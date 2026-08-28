@@ -156,6 +156,24 @@ check('състоянието връща това, което е нужно за
     .every(k => opsState.includes(k)));
 check('състоянието брои фантомните редове', /phantom_rows/.test(opsState));
 
+/* ------------------------------------------------------------
+   Изчистването трябва да маха ВСЯКА следа, включително тази, която
+   преизчисляването нарочно не пипа.
+   ------------------------------------------------------------ */
+G('Изчистване на тестови данни');
+
+const qa = read('tools/crm/QaTest.gs');
+check('маха заявки по тестов префикс', /bdsIsQaLeadId_/.test(qa));
+check('маха и заявки от истинската форма, познати по имейла',
+  /function bdsIsSyntheticLead_/.test(qa) && /example\\\.\(invalid\|test\)/.test(qa));
+check('маха реда от Raw Ads', /QA_CAMPAIGN_ID.*deleteRow|deleteRow.*QA_CAMPAIGN/s.test(qa));
+check('маха и реда от Marketing Daily',
+  /function bdsQaDeleteMarketingRow_/.test(qa) &&
+  /removed \+= bdsQaDeleteMarketingRow_/.test(qa));
+check('обяснено е защо самото преизчисляване не стига',
+  /не занулява разход заради липса/.test(qa));
+check('накрая преизчислява', /if \(removed\) rebuildMarketingFromCrm\(\);/.test(qa));
+
 G('Тайни');
 check('в Code.gs няма записан Spreadsheet ID',
   !/[01][a-zA-Z0-9_-]{25,}/.test(code));

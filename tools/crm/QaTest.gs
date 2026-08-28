@@ -253,7 +253,12 @@ function runBdsSelfTest() {
       ok('разходът остава непокътнат', bdsNum(m['Spend']) === QA_SPEND, String(m['Spend']));
     }
 
+    /* Махането на реда от Raw Ads НЕ е достатъчно: преизчисляването
+       нарочно никога не занулява разход заради липса — вносителят носи
+       само последните дни и старият разход трябва да оцелява. Затова
+       тестовият ред се маха и от Marketing Daily, изрично. */
     bdsQaDeleteRawAds_(raw, today, QA_CAMPAIGN_ID);
+    bdsQaDeleteMarketingRow_(md, QA_CAMPAIGN_ID);
     rebuildMarketingFromCrm();
     ok('след премахване на тестовия разход редът си отива',
       bdsQaFindMdRow_(md, today, 'Google Ads', QA_CAMPAIGN_ID) < 2);
@@ -367,26 +372,57 @@ function bdsQaDeleteRawAds_(sheet, dateKey, campaignId) {
   }
 }
 
+/** Маха ред от Marketing Daily по Campaign ID. Нужно е, защото
+    преизчисляването не занулява разход заради липса — виж по-горе. */
+function bdsQaDeleteMarketingRow_(md, campaignId) {
+  var last = md.getLastRow();
+  if (last < 2) return 0;
+  var values = md.getRange(2, 1, last - 1, 4).getValues();
+  var removed = 0;
+  for (var i = values.length - 1; i >= 0; i--) {
+    if (String(values[i][2]).trim() === String(campaignId)) { md.deleteRow(i + 2); removed++; }
+  }
+  return removed;
+}
+
+/** Заявка, произведена от тест, а не от човек.
+
+    Разпознава се по имейла: `.invalid` е запазена зона точно за това
+    (RFC 2606) и никой истински клиент няма такъв адрес. Заявките от
+    браузърните тестове минават през истинската форма и затова носят
+    нормален `BDS-ГГГГ-XXXXXX` номер — по префикс не се отличават. */
+function bdsIsSyntheticLead_(email) {
+  return /@example\.(invalid|test)$/i.test(String(email || '').trim());
+}
+
 /** Маха всяка следа от теста — включително от прекъснато пускане. */
 function bdsQaCleanup_(ss, leadId) {
   var leads = ss.getSheetByName(BDS_SHEETS.leads);
   var raw = ss.getSheetByName(BDS_SHEETS.rawAds);
+  var md = ss.getSheetByName(BDS_SHEETS.marketing);
   var removed = 0;
 
   var last = leads.getLastRow();
   if (last > 1) {
-    var ids = leads.getRange(2, 1, last - 1, 1).getValues();
-    for (var i = ids.length - 1; i >= 0; i--) {
-      if (bdsIsQaLeadId_(ids[i][0])) { leads.deleteRow(i + 2); removed++; }
+    var iEmail = bdsLeadIdx_('Email') - 1;
+    var width = BDS_LEAD_COLUMNS.length;
+    var rows = leads.getRange(2, 1, last - 1, width).getValues();
+    for (var i = rows.length - 1; i >= 0; i--) {
+      if (bdsIsQaLeadId_(rows[i][0]) || bdsIsSyntheticLead_(rows[i][iEmail])) {
+        leads.deleteRow(i + 2);
+        removed++;
+      }
     }
   }
   var lastRaw = raw.getLastRow();
   if (lastRaw > 1) {
-    var rows = raw.getRange(2, 1, lastRaw - 1, 3).getValues();
-    for (var j = rows.length - 1; j >= 0; j--) {
-      if (String(rows[j][2]).trim() === QA_CAMPAIGN_ID) { raw.deleteRow(j + 2); removed++; }
+    var rawRows = raw.getRange(2, 1, lastRaw - 1, 3).getValues();
+    for (var j = rawRows.length - 1; j >= 0; j--) {
+      if (String(rawRows[j][2]).trim() === QA_CAMPAIGN_ID) { raw.deleteRow(j + 2); removed++; }
     }
   }
+  removed += bdsQaDeleteMarketingRow_(md, QA_CAMPAIGN_ID);
+
   if (removed) rebuildMarketingFromCrm();
   return removed;
 }
