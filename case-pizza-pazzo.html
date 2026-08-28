@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pizza Pazzo — case study | Bulgaria Digital Services</title>
+  <meta name="description" content="Собствена система за онлайн поръчки на действаща пицария, работеща от 2012 г.: двуезично меню, количка, checkout, клиентски профили, админ панел и Android " />
+  <meta name="theme-color" content="#08080a" />
+  <link rel="canonical" href="https://bulgaria-digital-services.netlify.app/case-pizza-pazzo.html" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Pizza Pazzo — case study | Bulgaria Digital Services" />
+  <meta property="og:description" content="Собствена система за онлайн поръчки на действаща пицария, работеща от 2012 г.: двуезично меню, количка, checkout, клиентски профили, админ панел и Android " />
+  <meta property="og:image" content="https://bulgaria-digital-services.netlify.app/assets/img/pizza-pazzo.webp" />
+  <meta property="og:url" content="https://bulgaria-digital-services.netlify.app/case-pizza-pazzo.html" />
+  <meta property="og:locale" content="bg_BG" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="assets/img/bds-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/img/bds-favicon.png" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/offer.css" />
+</head>
+<body data-page="projects">
+  <div class="bg-aurora" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main>
+    <section class="cs-hero">
+      <div class="page-hero__glow" aria-hidden="true"></div>
+      <div class="container">
+        <nav class="breadcrumb" style="justify-content:flex-start"><a href="index.html">Начало</a> / <a href="projects.html">Проекти</a> / <span>Pizza Pazzo</span></nav>
+        <div class="cs-hero__inner">
+          <div class="reveal">
+            <span class="cs-hero__cat cs-hero__cat--system">Дигитална бизнес система</span>
+            <h1>Pizza Pazzo</h1>
+            <p class="cs-hero__summary">Собствена система за онлайн поръчки на действаща пицария, работеща от 2012 г.: двуезично меню, количка, checkout, клиентски профили, админ панел и Android приложение за кухнята.</p>
+            <dl class="cs-hero__meta">
+              <div><dt>Клиент</dt><dd>Pizza Pazzo LTD</dd></div>
+              <div><dt>Индустрия</dt><dd>Ресторант · пицария</dd></div>
+              <div><dt>Категория</dt><dd>Дигитална бизнес система</dd></div>
+
+            </dl>
+          </div>
+          <div class="cs-hero__shot reveal" data-delay="2"><img src="assets/img/pizza-pazzo.webp" alt="Дигиталното меню на Pizza Pazzo — начална страница с категории продукти" /></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight-top">
+      <div class="container">
+        <div class="cs-narrative">
+        <section class="cs-step reveal">
+          <p class="cs-step__label">01 · Проблем</p>
+          <div class="cs-step__body">
+            <h2>С какво е започнало</h2>
+            <p>Поръчките се приемат по телефон и се записват на ръка. Менюто е статично и всяка промяна на цена изисква намеса. Няма собствен канал, през който клиентът да поръча сам.</p>
+            <p><b>Целите на проекта:</b></p>
+            <ul class="cs-list">
+            <li>Собствен канал за онлайн поръчки, независим от marketplace платформа</li>
+            <li>Меню, което екипът обновява сам, без разработчик</li>
+            <li>Поръчката да стига до кухнята без ръчно преписване</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="cs-step reveal">
+          <p class="cs-step__label">02 · Решение</p>
+          <div class="cs-step__body">
+            <h2>Какво предложихме</h2>
+            <p>Next.js платформа с дигитално меню, количка и checkout, сървърна проверка на цените, клиентски профили, админ панел за поръчки и отчети, и отделно Android приложение за кухнята с печат на бонове по Bluetooth.</p>
+          </div>
+        </section>
+
+        <section class="cs-step reveal">
+          <p class="cs-step__label">03 · Изпълнение</p>
+          <div class="cs-step__body">
+            <h2>Какво конкретно е изградено</h2>
+            <ul class="cs-list">
+            <li>Двуезичен публичен сайт BG/EN (BG без префикс, EN на /en — старите URL адреси не се променят)</li>
+            <li>Дигитално меню: 98 продукта в 10 категории, с варианти по размер</li>
+            <li>Продуктови страници, категорийни страници, популярни продукти, галерия, контакти</li>
+            <li>Количка и checkout с доставка и плащане в брой при доставка</li>
+            <li>Сървърна валидация на цените (клиентът не може да подмени сума)</li>
+            <li>Регистрация, вход, клиентски профил, адреси и история на поръчките</li>
+            <li>Роли и защитени маршрути (customer / staff / admin / super_admin)</li>
+            <li>Седем статуса на поръчката: очаква потвърждение, прието, приготвя се, готово, в доставка, доставено, отказано</li>
+            <li>Админ панел: живи поръчки, приемане и отказ с време, продукти, категории, варианти, меню, настройки</li>
+            <li>Отчети в админ панела и работни смени</li>
+            <li>Редактируеми от админа данни на ресторанта и работно време</li>
+            <li>Транзакционни имейли през Resend</li>
+            <li>Шаблони за печат на поръчка за 80 mm термален принтер</li>
+            <li>Android приложение за кухнята с печат по Bluetooth</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="cs-step reveal">
+          <p class="cs-step__label">04 · Трудната част</p>
+          <div class="cs-step__body">
+            <h2>Кое беше сложното и как е решено</h2>
+            <p>Двуезичността трябваше да влезе преди количката. Сайтът pizzapazzo.bg се индексира от 2012 г. — префиксиране на българските адреси щеше да пренасочи всеки съществуващ URL и да изхвърли натрупаното SEO.</p>
+            <p>BG остана без езиков префикс, EN мина на /en. Текстовете на менюто се пазят като двойка {bg, en} в данните, а езикът се резолвва в един data слой — UI компонентите не знаят, че съществуват преводи. Два речника със 354 ключа са типизирани, така че сгрешен ключ е грешка при компилация, а отделна проверка спира разминаване между двата езика.</p>
+          </div>
+        </section>
+
+        <section class="cs-step reveal">
+          <p class="cs-step__label">05 · Резултат</p>
+          <div class="cs-step__body">
+            <h2>Проверими резултати</h2>
+            <div class="cs-facts">
+              <dl class="cs-fact"><dt>Продукти в менюто</dt><dd>98 в 10 категории</dd></dl>
+              <dl class="cs-fact"><dt>Варианти и размери</dt><dd>84</dd></dl>
+              <dl class="cs-fact"><dt>Статуси на поръчката</dt><dd>7</dd></dl>
+              <dl class="cs-fact"><dt>Роли за достъп</dt><dd>4 (CUSTOMER, STAFF, ADMIN, SUPER_ADMIN)</dd></dl>
+              <dl class="cs-fact"><dt>Езици</dt><dd>BG / EN</dd></dl>
+              <dl class="cs-fact"><dt>i18n ключове</dt><dd>354, синхронни между двата речника</dd></dl>
+              <dl class="cs-fact"><dt>TypeScript</dt><dd>strict, 0 грешки</dd></dl>
+              <dl class="cs-fact"><dt>Проверка на цените</dt><dd>на сървъра</dd></dl>
+              <dl class="cs-fact"><dt>Печат</dt><dd>80 mm термален принтер по Bluetooth</dd></dl>
+            </div>
+            <p><b>Какво вече може бизнесът:</b></p>
+            <ul class="cs-list">
+            <li>Клиентът може да поръча сам, с доставка до адрес</li>
+            <li>Екипът приема или отказва поръчка и задава време за изпълнение</li>
+            <li>Поръчката минава през ясни статуси до доставяне</li>
+            <li>Менюто, цените, вариантите и продуктите се управляват от админ панела</li>
+            <li>Кухнята вижда поръчката на отделно устройство и я печата</li>
+            <li>Собственикът вижда отчети за поръчките по период и смяна</li>
+            </ul>
+            <p><b>Техническа валидация:</b></p>
+            <ul class="cs-list">
+            <li>TypeScript type check без грешки</li>
+            <li>Успешен production build</li>
+            <li>Проверка за синхронност на двата езикови речника</li>
+            <li>Smoke скрипт за пътя количка → checkout → поръчка</li>
+            </ul>
+          </div>
+        </section>
+        </div>
+
+        <div class="cs-status reveal">
+          <p class="cs-status__title">Точен статус на проекта</p>
+          <p>Системата е разработена и технически валидирана. Пускането в реална среда (хостинг, домейн, реални снимки, потвърдени алергени) към момента не е финализирано. В текущата версия клиентският checkout поддържа доставка с плащане в брой; вземането от място е реализирано в кухненския печат, но още не е пуснато в клиентския път. Картовите плащания и интеграцията с Microinvest не са внедрени.</p>
+        </div>
+
+        <div class="cs-stack">
+          <span>Next.js 15</span>
+          <span>React 19</span>
+          <span>TypeScript</span>
+          <span>Tailwind CSS</span>
+          <span>Prisma + SQLite</span>
+          <span>next-intl</span>
+          <span>Resend</span>
+          <span>Kotlin (Android)</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="eyebrow">Накъде оттук</span>
+          <h2 class="section__title">Подобен проект за вашия бизнес</h2>
+        </div>
+        <div class="cs-next">
+          <a href="contact.html" class="cs-next__card">
+            <span class="cs-next__kicker">Следваща стъпка</span>
+            <span class="cs-next__title">Заяви консултация за дигитална бизнес система</span>
+            <span class="cs-card__summary">Проектът ви управлява данни и процес? Офертира се индивидуално, след анализ на работния поток.</span>
+          </a>
+          <a href="case-makeup-denitsa.html" class="cs-next__card">
+            <span class="cs-next__kicker">Свързан проект</span>
+            <span class="cs-next__title">Make up by Denitsa</span>
+            <span class="cs-card__summary">Платформа за продажба и управление на онлайн обучения по грим: акаунти, платен достъп, видео уроци с проследяване на про…</span>
+          </a>
+          <a href="/restaurants" class="cs-next__card" data-track="link_to_restaurants">
+            <span class="cs-next__kicker">За ресторанти</span>
+            <span class="cs-next__title">Сайтове и системи за заведения</span>
+            <span class="cs-card__summary">Онлайн поръчки, меню, което екипът движи сам, и път на поръчката до кухнята.</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/js/bds-data.js" defer></script>
+  <script src="assets/js/bds-tracking.js" defer></script>
+  <script src="assets/js/bds-consent.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+</body>
+</html>

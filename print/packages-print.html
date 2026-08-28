@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8" />
+<title>Кой BDS пакет е подходящ за моя бизнес?</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* Sora няма кирилски глифове — затова навсякъде има изричен
+     fallback стек. Без него част от текста пада в serif. */
+  :root {
+    --head: 'Sora', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  @page { size: A4; margin: 14mm 14mm 16mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--body); color: #16161b; font-size: 9.4pt; line-height: 1.5; background: #fff; }
+  h1, h2, h3, h4 { font-family: var(--head); color: #0d0d10; }
+  a { color: #0b4fd0; text-decoration: none; }
+
+  .p-cover { border-top: 5px solid #0b4fd0; padding-top: 8mm; margin-bottom: 7mm; }
+  .p-brand { font-family: var(--head); font-weight: 800; letter-spacing: .18em; font-size: 10pt; color: #0b4fd0; text-transform: uppercase; }
+  .p-cover h1 { font-size: 21pt; line-height: 1.15; margin-top: 3mm; letter-spacing: -0.02em; }
+  .p-cover p { color: #4a4a52; margin-top: 3mm; max-width: 150mm; }
+
+  .p-rule { background: #eef4fd; border: 1px solid #c3d8fb; border-radius: 3mm; padding: 4mm 5mm; margin: 5mm 0 7mm; text-align: center; }
+  .p-note { border-left: 1mm solid #1e7bff; background: #f5f9ff; padding: 3.5mm 5mm; margin: 0 0 7mm; font-size: 8.6pt; line-height: 1.55; color: #4a4a4a; }
+  .p-note b { color: #1a1a1a; }
+  .p-rule b { font-family: var(--head); font-size: 11pt; color: #083aa0; }
+
+  h2.p-h { font-size: 13pt; margin: 0 0 4mm; padding-bottom: 2mm; border-bottom: 1.5px solid #0b4fd0; }
+
+  .p-two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-bottom: 6mm; }
+  .p-box { border: 1px solid #ddd; border-radius: 3mm; padding: 4mm 5mm; }
+  .p-box h3 { font-size: 10.5pt; margin-bottom: 2mm; }
+  .p-box .kick { font-size: 7.6pt; letter-spacing: .12em; text-transform: uppercase; color: #0b4fd0; font-family: var(--head); font-weight: 600; }
+  .p-box ul { margin: 2mm 0 0 4mm; }
+  .p-box li { margin-bottom: 1mm; color: #45454d; }
+
+  .p-pkg { border: 1px solid #ddd; border-radius: 3mm; padding: 4mm 5mm; margin-bottom: 5mm; page-break-inside: avoid; break-inside: avoid; }
+  .p-pkg__head { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; border-bottom: 1px solid #eee; padding-bottom: 2mm; margin-bottom: 2mm; }
+  .p-pkg__head h3 { font-size: 12pt; letter-spacing: -0.01em; }
+  .p-pkg__price { font-family: var(--head); font-weight: 700; color: #0b4fd0; font-size: 11pt; white-space: nowrap; }
+  .p-pkg__pos { color: #45454d; margin-bottom: 3mm; }
+  .p-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .p-cols h4 { font-size: 8.4pt; letter-spacing: .1em; text-transform: uppercase; color: #6b6b74; margin: 0 0 1.5mm; }
+  .p-cols h4 + h4 { margin-top: 3mm; }
+  .p-cols p { margin-bottom: 2mm; color: #45454d; }
+  .p-cols ul { margin: 0 0 0 4mm; }
+  .p-cols li { margin-bottom: 1mm; color: #45454d; }
+
+  table.p-cmp { width: 100%; border-collapse: collapse; margin-bottom: 6mm; page-break-inside: avoid; break-inside: avoid; }
+  table.p-cmp th, table.p-cmp td { border: 1px solid #ddd; padding: 2mm 3mm; text-align: left; font-size: 8.8pt; }
+  table.p-cmp thead th { background: #eef4fd; font-family: var(--head); font-size: 8.4pt; letter-spacing: .08em; text-transform: uppercase; color: #083aa0; }
+  table.p-cmp tbody th { font-weight: 500; color: #45454d; width: 34%; }
+
+  .p-next { border-left: 3px solid #0b4fd0; background: #f3f6fc; padding: 4mm 5mm; border-radius: 0 3mm 3mm 0; page-break-inside: avoid; }
+  .p-next h3 { font-size: 11pt; margin-bottom: 2mm; }
+  .p-next ol { margin: 2mm 0 0 5mm; }
+  .p-next li { margin-bottom: 1.5mm; color: #45454d; }
+
+  .p-foot { margin-top: 7mm; padding-top: 3mm; border-top: 1px solid #ddd; display: flex; justify-content: space-between; gap: 5mm; font-size: 8.4pt; color: #6b6b74; }
+  .p-foot b { color: #16161b; }
+  .p-break { page-break-before: always; break-before: page; }
+</style>
+</head>
+<body>
+
+  <div class="p-cover">
+    <div class="p-brand">Bulgaria Digital Services</div>
+    <h1>Кой BDS пакет е подходящ<br />за моя бизнес?</h1>
+    <p>Кратко ръководство за 2 минути. Първо разбирате дали ви трябва сайт или система, после кой от трите пакета отговаря на нуждата ви — и кога стандартен пакет вече не стига.</p>
+  </div>
+
+
+
+  <h2 class="p-h">1. Първо: сайт или система?</h2>
+  <div class="p-two">
+    <div class="p-box">
+      <span class="kick">Сайтът представя бизнеса</span>
+      <h3>Професионални бизнес сайтове</h3>
+      <p style="color:#45454d">Сайтът представя бизнеса пред клиента: изгражда доверие, обяснява услугите и насочва посетителя към едно конкретно действие — обаждане, запитване или запазен час.</p>
+      <ul><li>Показва кой сте и за кого работите</li><li>Обяснява услугите с ясни думи</li><li>Изгражда доверие чрез реални проекти и отзиви</li><li>Води посетителя към едно ясно действие</li></ul>
+    </div>
+    <div class="p-box">
+      <span class="kick">Системата управлява бизнеса</span>
+      <h3>Дигитални бизнес системи</h3>
+      <p style="color:#45454d">Системата управлява данни и реален работен процес: потребители, поръчки, плащания, статуси, роли и вътрешни отчети. Тя продължава да работи и след като клиентът е натиснал бутона.</p>
+      <ul><li>Съхранява и обработва данни (профили, поръчки, плащания)</li><li>Управлява оперативен процес — статуси, роли, одобрения</li><li>Дава на екипа админ панел и отчети</li><li>Автоматизира стъпки, които днес се правят на ръка</li></ul>
+    </div>
+  </div>
+  <p style="color:#45454d;margin-bottom:6mm"><b>Правилото на практика:</b> ако решението съхранява данни и управлява работен процес след първоначалното запитване — профили, поръчки, плащания, роли, статуси или одобрения — това е дигитална бизнес система и се офертира индивидуално, а не по пакет.</p>
+
+  <div class="p-break"></div>
+  <h2 class="p-h">2. Трите пакета за професионални бизнес сайтове</h2>
+      <section class="p-pkg">
+        <header class="p-pkg__head">
+          <h3>BDS START</h3>
+          <span class="p-pkg__price">250 €</span>
+        </header>
+        <p class="p-pkg__pos">Професионално онлайн присъствие без излишно сложни функционалности.</p>
+        <div class="p-cols">
+          <div>
+            <h4>Кога е правилният избор</h4>
+            <p>Малки фирми, самостоятелни специалисти и локални бизнеси, които искат модерен и професионален сайт.</p>
+            <p><b>Решава:</b> Бизнесът съществува, но онлайн го няма или изглежда непрофесионално. Клиентите не намират ясна информация и не знаят как да се свържат.</p>
+            <p><b>Цели:</b> Посетителят разбира за минута какво предлагате и има един ясен начин да се свърже с вас.</p>
+          </div>
+          <div>
+            <h4>Измерими лимити</h4>
+            <ul><li>Основни страници: <b>до 4</b></li><li>Индивидуални секции: <b>до 10</b></li><li>Езици: <b>1</b></li><li>Контактни форми: <b>1</b></li><li>Кръгове корекции: <b>до 2</b></li></ul>
+            <h4>Не включва</h4>
+            <ul><li>Галерия / портфолио</li><li>Google Analytics и Search Console</li><li>Conversion tracking</li><li>CMS за самостоятелно редактиране</li><li>Blog / News секция</li></ul>
+          </div>
+        </div>
+      </section>
+      <section class="p-pkg">
+        <header class="p-pkg__head">
+          <h3>BDS BUSINESS</h3>
+          <span class="p-pkg__price">450 €</span>
+        </header>
+        <p class="p-pkg__pos">По-сериозно и пълноценно онлайн присъствие с измеримост.</p>
+        <div class="p-cols">
+          <div>
+            <h4>Кога е правилният избор</h4>
+            <p>Компании с повече услуги, повече съдържание и нужда от по-добро представяне пред потенциалните клиенти.</p>
+            <p><b>Решава:</b> Има сайт или присъствие, но той не убеждава и не се мери. Услугите не са подредени, няма доказателства и не е ясно кое работи.</p>
+            <p><b>Цели:</b> Подредена структура по услуги, видими доказателства и измерими източници на запитвания.</p>
+          </div>
+          <div>
+            <h4>Измерими лимити</h4>
+            <ul><li>Основни страници: <b>до 7</b></li><li>Индивидуални секции: <b>до 25</b></li><li>Езици: <b>до 2</b></li><li>Контактни форми: <b>до 2</b></li><li>Кръгове корекции: <b>до 3</b></li></ul>
+            <h4>Не включва</h4>
+            <ul><li>Blog / News секция</li><li>Пълен CMS (управлението е частично)</li><li>Meta Pixel</li><li>Повече от 2 езика</li><li>File upload и conditional полета във формите</li></ul>
+          </div>
+        </div>
+      </section>
+      <section class="p-pkg">
+        <header class="p-pkg__head">
+          <h3>BDS PREMIUM</h3>
+          <span class="p-pkg__price">600 €</span>
+        </header>
+        <p class="p-pkg__pos">Премиум дигитално представяне, върху което стъпват рекламата и имиджът.</p>
+        <div class="p-cols">
+          <div>
+            <h4>Кога е правилният избор</h4>
+            <p>Компании, за които сайтът е важна част от имиджа, рекламата и привличането на нови клиенти.</p>
+            <p><b>Решава:</b> Сайтът трябва да носи имидж, да поема реклама и да расте — а не просто да съществува.</p>
+            <p><b>Цели:</b> Дълбока структура, многоезичност, съдържание, което клиентът управлява сам, и основа за платена реклама.</p>
+          </div>
+          <div>
+            <h4>Измерими лимити</h4>
+            <ul><li>Основни страници: <b>до 10</b></li><li>Индивидуални секции: <b>до 40</b></li><li>Езици: <b>до 5</b></li><li>Форми: <b>до 4</b></li><li>Кръгове корекции: <b>до 4</b></li></ul>
+            <h4>Не включва</h4>
+            <ul><li>Онлайн поръчки и количка</li><li>Клиентски профили и вход</li><li>Плащания</li><li>Административен панел за оперативен процес</li><li>Кухненски или складов workflow</li></ul>
+          </div>
+        </div>
+      </section>
+
+  <div class="p-break"></div>
+  <h2 class="p-h">3. Кратко сравнение</h2>
+  <table class="p-cmp">
+    <thead><tr><th>Какво сравняваме</th><th>START</th><th>BUSINESS</th><th>PREMIUM</th></tr></thead>
+    <tbody>
+          <tr><th>Цена за изработка</th><td>250 €</td><td>450 €</td><td>600 €</td></tr>
+          <tr><th>Основни страници</th><td>до 4</td><td>до 7</td><td>до 10</td></tr>
+          <tr><th>Индивидуални секции</th><td>до 10</td><td>до 25</td><td>до 40</td></tr>
+          <tr><th>Езици</th><td>1</td><td>до 2</td><td>до 5</td></tr>
+          <tr><th>Контактни форми</th><td>1</td><td>до 2</td><td>до 4</td></tr>
+          <tr><th>Кръгове корекции</th><td>до 2</td><td>до 3</td><td>до 4</td></tr>
+          <tr><th>Галерия / портфолио</th><td>—</td><td>включено</td><td>разширена</td></tr>
+          <tr><th>Analytics и tracking</th><td>—</td><td>включено</td><td>включено</td></tr>
+          <tr><th>CMS за съдържанието</th><td>—</td><td>частичен</td><td>включено</td></tr>
+          <tr><th>Blog / News</th><td>—</td><td>—</td><td>включено</td></tr>
+          <tr><th>Meta Pixel</th><td>—</td><td>—</td><td>включено</td></tr>
+          <tr><th>Онлайн поръчки и плащания</th><td>—</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p style="color:#6b6b74;font-size:8.4pt;margin-bottom:6mm">„—“ означава, че услугата не е включена в пакета. Броят ревизии и лимитите по съдържание се фиксират писмено в персоналната оферта. Ориентировъчен срок за пакетите: 1–4 седмици според обхвата.</p>
+
+  <h2 class="p-h">4. Кога стандартен пакет НЕ е достатъчен</h2>
+  <div class="p-box" style="margin-bottom:6mm">
+    <p style="color:#45454d;margin-bottom:2mm">Ако поне едно от изброените важи за вашия проект, той излиза извън START, BUSINESS и PREMIUM и се офертира като дигитална бизнес система:</p>
+    <ul style="columns:2;column-gap:6mm"><li>потребителски профили и вход</li><li>поръчки и checkout</li><li>обработване на плащания</li><li>оперативни роли и права на достъп</li><li>статуси и одобрения</li><li>разпределяне на задачи</li><li>управление на наличности</li><li>клиентски портал</li><li>вътрешен dashboard</li><li>повтарящ се оперативен workflow</li><li>управление на бизнес процеса след запитването</li></ul>
+  </div>
+
+  <h2 class="p-h">5. Следваща стъпка</h2>
+  <div class="p-next">
+    <h3>Безплатна консултация</h3>
+    <ol>
+      <li>Разказвате накратко какъв е бизнесът и какъв проблем трябва да бъде решен.</li>
+      <li>Заедно определяме дали проектът е сайт или система.</li>
+      <li>Получавате персонална оферта с точен обхват, лимити, срок и цена.</li>
+      <li>Обхватът се одобрява писмено, преди работата да започне.</li>
+    </ol>
+  </div>
+
+  <div class="p-foot">
+    <div><b>Преслав Блажев</b> · Bulgaria Digital Services<br />pr2.blazhev@gmail.com · 0877 364 001</div>
+    <div style="text-align:right">Документът отразява актуалните пакети към<br />датата на изпращане. Цените са в € без включени third-party разходи.</div>
+  </div>
+
+</body>
+</html>

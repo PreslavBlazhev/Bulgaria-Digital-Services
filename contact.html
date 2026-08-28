@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Контакти — BDS | Заяви безплатна консултация</title>
+  <meta name="description" content="Свържете се с Bulgaria Digital Services за безплатна консултация. Разкажете за вашия бизнес и ще получите ясна идея как да подобрим онлайн присъствието ви." />
+  <meta name="theme-color" content="#08080a" />
+  <link rel="canonical" href="https://bulgaria-digital-services.netlify.app/contact.html" />
+  <meta property="og:title" content="Контакти — Bulgaria Digital Services" />
+  <meta property="og:description" content="Заяви безплатна консултация за твоя проект." />
+  <meta property="og:image" content="https://bulgaria-digital-services.netlify.app/assets/img/bds-og.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="assets/img/bds-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/img/bds-favicon.png" />
+  <!-- tokens.css идва пръв като самостоятелен link. Преди беше само
+       @import вътре в style.css, което сериализира: браузърът трябваше
+       да изтегли и разбере style.css, за да разбере, че му трябва и
+       tokens.css. Двата файла вече се теглят паралелно. Редът в
+       каскадата е същият, който @import произвеждаше. -->
+  <link rel="stylesheet" href="assets/css/tokens.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="contact">
+  <div class="bg-aurora" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div id="site-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="page-hero__glow" aria-hidden="true"></div>
+      <div class="container reveal">
+        <nav class="breadcrumb"><a href="index.html">Начало</a> / <span>Контакти</span></nav>
+        <h1>Заяви <span class="text-chrome">безплатна консултация</span></h1>
+        <p>Разкажете ни за бизнеса си и ще получите ясна идея как Bulgaria Digital Services може да подобри онлайн присъствието ви. Отговаряме в рамките на 24 часа.</p>
+      </div>
+    </section>
+
+    <section class="section cta" id="contact">
+      <div class="cta__glow" aria-hidden="true"></div>
+      <div class="container cta__grid">
+        <div class="cta__text reveal">
+          <span class="eyebrow">Безплатна консултация</span>
+          <h2 class="section__title">Готови ли сте бизнесът ви да изглежда по-професионално?</h2>
+          <p class="section__lead">Изпратете запитване и ще получите ясна идея как Bulgaria Digital Services може да подобри онлайн присъствието ви, да изгради повече доверие и да улесни клиентите да се свържат с вас.</p>
+
+          <div class="cta__perks">
+            <h3 class="cta__perks-title">Какво получавате след запитването:</h3>
+            <ul>
+              <li><span class="cta__check" aria-hidden="true">✓</span> Безплатен първоначален анализ</li>
+              <li><span class="cta__check" aria-hidden="true">✓</span> Идея за структура на сайта</li>
+              <li><span class="cta__check" aria-hidden="true">✓</span> Насоки за по-добро представяне</li>
+              <li><span class="cta__check" aria-hidden="true">✓</span> Индивидуална оферта според целите ви</li>
+            </ul>
+          </div>
+
+          <!-- Контактни методи -->
+          <ul class="cta__contacts">
+            <li><span class="ico" aria-hidden="true">👤</span> Преслав Блажев — основател, Bulgaria Digital Services</li>
+            <li><span class="ico" aria-hidden="true">✉</span> <a href="mailto:pr2.blazhev@gmail.com">pr2.blazhev@gmail.com</a></li>
+            <li><span class="ico" aria-hidden="true">☎</span> <a href="tel:+359877364001">0877 364 001</a></li>
+            <li><span class="ico" aria-hidden="true">⌖</span> с. Къшин, общ. Плевен, ул. „Кирил и Методий“ 8</li>
+            <li><span class="ico" aria-hidden="true">◆</span> <a href="https://instagram.com/_.preslav._b" target="_blank" rel="noopener">Instagram: @_.preslav._b</a></li>
+            <li><span class="ico" aria-hidden="true">◷</span> Отговаряме 24/7 · България</li>
+          </ul>
+        </div>
+
+        <form class="form reveal" data-delay="1" id="contactForm" novalidate>
+          <div class="form__field"><label for="name">Име</label><input type="text" id="name" name="name" required placeholder="Вашето име" /></div>
+          <div class="form__row">
+            <div class="form__field"><label for="phone">Телефон</label><input type="tel" id="phone" name="phone" placeholder="+359..." /></div>
+            <div class="form__field"><label for="email">Имейл</label><input type="email" id="email" name="email" required placeholder="email@example.com" /></div>
+          </div>
+          <div class="form__row">
+            <div class="form__field">
+              <label for="business">Тип бизнес</label>
+              <select id="business" name="business">
+                <option value="">Изберете...</option>
+                <option>Ресторант / Заведение</option>
+                <option>Beauty / Салон</option>
+                <option>Автосервиз / Авто услуги</option>
+                <option>Локална услуга</option>
+                <option>Онлайн обучение</option>
+                <option>Друго</option>
+              </select>
+            </div>
+            <div class="form__field">
+              <label for="service">Услуга</label>
+              <select id="service" name="service">
+                <option value="">Изберете...</option>
+                <option>Бизнес сайт</option>
+                <option>Дигитално меню</option>
+                <option>Онлайн записвания</option>
+                <option>Брандинг</option>
+                <option>Поддръжка</option>
+                <option>Не съм сигурен</option>
+              </select>
+            </div>
+          </div>
+          <div class="form__field"><label for="message">Съобщение</label><textarea id="message" name="message" rows="4" placeholder="Разкажете ни накратко какво искате да изградим..."></textarea></div>
+          <button type="submit" class="btn btn--brand btn--lg btn--block">Изпрати запитване</button>
+          <p class="form__trust">Ще се свържем с вас с ясни следващи стъпки. Без спам.</p>
+          <p class="form__note" id="formNote" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section section--alt">
+      <div class="container container--narrow">
+        <div class="section__head reveal">
+          <span class="eyebrow">FAQ</span>
+          <h2 class="section__title">Преди да пишете</h2>
+        </div>
+        <div class="faq">
+          <div class="faq__item reveal"><button class="faq__q" aria-expanded="false">Консултацията наистина ли е безплатна?<span class="faq__icon">+</span></button><div class="faq__a"><p>Да, напълно. Първоначалният разговор е без ангажимент и без такса — целта е да разберем как можем да помогнем.</p></div></div>
+          <div class="faq__item reveal"><button class="faq__q" aria-expanded="false">Колко бързо ще получа отговор?<span class="faq__icon">+</span></button><div class="faq__a"><p>Обикновено в рамките на 24 часа в работни дни.</p></div></div>
+          <div class="faq__item reveal"><button class="faq__q" aria-expanded="false">Трябва ли вече да имам готова идея?<span class="faq__icon">+</span></button><div class="faq__a"><p>Не. Дори само с обща идея за бизнеса си, ние ще ви насочим към най-доброто решение.</p></div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="assets/js/bds-tracking.js" defer></script>
+  <script src="assets/js/bds-consent.js" defer></script>
+  <script src="assets/js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+/* ============================================================
+   BDS — Bulgaria Digital Services · Design System (central tokens)
+   SINGLE SOURCE OF TRUTH.
+   Никъде в проекта не бива да има random hex / random радиуси /
+   random сенки / random animation скорости — всичко идва оттук.
+   ============================================================ */
+
+/* Метрично изравнен резервен шрифт.
+   Segoe UI е с 6% по-широк от Sora при тегло 800, което караше
+   hero заглавието да се пренася на още един ред преди Sora да
+   пристигне — и целият блок под него скачаше нагоре при замяната.
+   size-adjust изравнява ширината, така че замяната е незабележима.
+   Измерено, не предположено: Sora w800 / Segoe UI = 94.30%. */
+@font-face {
+  font-family: 'Sora fallback';
+  src: local('Segoe UI'), local('Helvetica Neue'), local('Roboto'), local('Arial');
+  size-adjust: 94.30%;
+  ascent-override: 96%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+:root {
+  /* ==========================================================
+     1. COLOR  —  BDS palette, derived from `logo/logo BDS.png`
+     ----------------------------------------------------------
+     Логото е три неща: ЧЕРЕН фон, ХРОМ букви и ЕЛЕКТРИКОВО СИНЬО.
+     Извлечени стойности от файла (пикселна извадка):
+       · връх на синьото            #0059FF   (R=0 — чисто, без червено)
+       · работни сини               #0070F0 · #0040D0 · #002080
+       · дълбоко синьо (сянка)      #002070 · #001040
+       · хром                       #F0F0F0 → #C0C0D0 → #9090A0
+       · фон                        #000000 (79% от логото)
+     Хромът е студен — синият канал е винаги над червения. Всички
+     неутрални тук са наклонени по същия начин, за да не се „скарат“
+     с логото.
+     ========================================================== */
+
+  /* Surfaces / backgrounds — студено черно, не кафяво-черно */
+  --bg:            #05070d;   /* Background      */
+  --bg-2:          #080b13;
+  --bg-3:          #0c1019;
+  --surface:       #0a0e17;   /* Surface         */
+  --card:          #10151f;   /* Card            */
+  --card-2:        #151b27;
+
+  /* Borders / lines */
+  --border:        rgba(180, 205, 255, 0.09);  /* Border          */
+  --border-strong: rgba(180, 205, 255, 0.16);
+  --line:          var(--border);              /* legacy alias    */
+  --line-2:        var(--border-strong);       /* legacy alias    */
+
+  /* Brand — electric blue (interactive / accent) */
+  --brand:         #1e7bff;   /* Primary Blue    */
+  --brand-hover:   #4d9bff;   /* Hover Blue      */
+  --brand-2:       #5aa9ff;   /* accent text on dark — 7.6:1 контраст */
+  --brand-3:       #a9d0ff;   /* pale blue       */
+  --brand-core:    #0059ff;   /* върхът от логото */
+  --brand-deep:    #0033a0;
+  --brand-ink:     #f2f7ff;   /* text ON blue    */
+  --brand-grad:    linear-gradient(135deg, #4d9bff 0%, #0059ff 48%, #0033a0 100%);
+  --brand-soft:    rgba(61, 155, 255, 0.10);   /* subtle blue fill  */
+  --brand-soft-2:  rgba(61, 155, 255, 0.18);
+  --brand-border:  rgba(61, 155, 255, 0.30);   /* blue border tint  */
+
+  /* Chrome — металът от буквите BDS; за display-акценти */
+  --chrome-1:      #f4f7ff;
+  --chrome-2:      #cfd6e6;
+  --chrome-3:      #9aa3b8;
+  --chrome-ink:    #05070d;   /* text ON chrome  */
+  /* Точно каквото правят буквите BDS: бял метал горе → електрик долу. */
+  --chrome-grad:   linear-gradient(170deg, #ffffff 0%, #dbe4f5 24%, #8ec0ff 52%, #1e7bff 78%, #0044d6 100%);
+  --chrome-grad-flat: linear-gradient(135deg, #ffffff 0%, #cfd6e6 38%, #8f9ab2 62%, #e8edf8 100%);
+
+  /* Neutrals — студено сиво, в тон с хрома */
+  --white:         #f2f5fa;   /* White           */
+  --gray-100:      #b3bccd;   /* Gray 100        */
+  --gray-200:      #808a9d;   /* Gray 200        */
+  --gray-300:      #525b6d;   /* Gray 300        */
+  --text:          var(--white);    /* legacy alias */
+  --text-2:        var(--gray-100);  /* legacy alias */
+  --text-3:        var(--gray-200);  /* legacy alias */
+
+  /* Status */
+  --error:         #ff7a8c;   /* Error           */
+  --error-border:  #a04d5c;
+  --success:       #3fd6a0;   /* Success         */
+  --warning:       #ffc247;   /* Warning         */
+  --danger-dot:    #ff5c6c;   /* UI accent (mock) */
+  --mock-dot:      #262d3b;   /* neutral UI dot   */
+
+  /* ==========================================================
+     2. TYPOGRAPHY
+     ========================================================== */
+  --font-head: 'Sora', 'Sora fallback', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Type scale */
+  --fs-hero:    clamp(2.5rem, 6vw, 4.6rem);   /* Hero    */
+  --fs-h1:      clamp(2.3rem, 5.5vw, 3.8rem); /* H1      */
+  --fs-h2:      clamp(1.9rem, 4.4vw, 3.1rem); /* H2      */
+  --fs-h3:      1.25rem;                      /* H3      */
+  --fs-body-lg: 1.14rem;                      /* Body L  */
+  --fs-body:    1rem;                         /* Body    */
+  --fs-small:   0.9rem;                       /* Small   */
+  --fs-caption: 0.78rem;                      /* Caption */
+
+  /* Line heights */
+  --lh-tight:  1.1;
+  --lh-snug:   1.35;
+  --lh-normal: 1.6;
+
+  /* Letter spacing */
+  --ls-tight:  -0.02em;
+  --ls-normal: 0;
+  --ls-wide:   0.08em;
+  --ls-wider:  0.22em;
+
+  /* Font weights */
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-extra:    800;
+
+  /* ==========================================================
+     3. SPACING SCALE  (only these values are allowed)
+     ========================================================== */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-32:  128px;
+
+  /* ==========================================================
+     4. BORDER RADIUS
+     ========================================================== */
+  --r-xs:    6px;
+  --r-sm:    10px;
+  --r-md:    14px;
+  --r-lg:    18px;
+  --r-xl:    24px;
+  --r-pill:  999px;
+  /* Component aliases */
+  --r-button:  var(--r-pill);
+  --r-card:    var(--r-lg);
+  --r-input:   12px;
+  --r-badge:   var(--r-pill);
+  --r-image:   var(--r-md);
+  --r-navbar:  20px;
+  --r-icon:    var(--r-md);   /* small icon tiles */
+  --radius:    var(--r-lg);   /* legacy alias */
+  --radius-sm: var(--r-sm);   /* legacy alias */
+
+  /* ==========================================================
+     5. SHADOWS
+     ========================================================== */
+  --shadow-sm:  0 6px 18px -8px rgba(0, 0, 0, 0.5);
+  --shadow-md:  0 18px 40px -24px rgba(0, 0, 0, 0.7);
+  --shadow-lg:  0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  --glow-brand: 0 0 60px -10px rgba(30, 123, 255, 0.55);
+  --glow-chrome: 0 0 48px -14px rgba(207, 214, 230, 0.30);
+  --glow-premium: 0 22px 50px -26px rgba(0, 0, 0, 0.75), 0 0 44px -14px rgba(61, 155, 255, 0.28);
+  /* Blue button shadows */
+  --shadow-btn:       0 10px 30px -10px rgba(30, 123, 255, 0.65);
+  --shadow-btn-hover: 0 18px 44px -12px rgba(61, 155, 255, 0.85);
+  --glow-gold:  var(--glow-brand);   /* legacy alias */
+  --shadow:     var(--shadow-lg);   /* legacy alias */
+
+  /* ==========================================================
+     6. MOTION  (single set of durations / easings)
+     ========================================================== */
+  --ease:         cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);  /* alias of --ease */
+  --ease-soft:    cubic-bezier(0.16, 1, 0.3, 1);   /* alias of --ease-out */
+  --dur-fast:   0.2s;
+  --dur:        0.3s;
+  --dur-slow:   0.45s;
+  --dur-slower: 0.6s;
+  /* named durations (public API) */
+  --duration-fast:   180ms;
+  --duration-normal: 300ms;
+  --duration-slow:   600ms;
+  --duration-reveal: 800ms;
+
+  /* ==========================================================
+     7. LAYOUT
+     ========================================================== */
+  --container: 1180px;
+  --nav-h:     74px;
+}
+
+/* ============================================================
+   TYPOGRAPHY UTILITIES
+   Всеки текст може да ползва тези класове за единна типография.
+   ============================================================ */
+.t-hero    { font-family: var(--font-head); font-weight: var(--fw-extra);    font-size: var(--fs-hero);    line-height: var(--lh-tight);  letter-spacing: var(--ls-tight); }
+.t-h1      { font-family: var(--font-head); font-weight: var(--fw-extra);    font-size: var(--fs-h1);      line-height: var(--lh-tight);  letter-spacing: var(--ls-tight); }
+.t-h2      { font-family: var(--font-head); font-weight: var(--fw-bold);     font-size: var(--fs-h2);      line-height: var(--lh-tight);  letter-spacing: var(--ls-tight); }
+.t-h3      { font-family: var(--font-head); font-weight: var(--fw-bold);     font-size: var(--fs-h3);      line-height: var(--lh-snug);   letter-spacing: var(--ls-tight); }
+.t-body-lg { font-family: var(--font-body); font-weight: var(--fw-regular);  font-size: var(--fs-body-lg); line-height: var(--lh-normal); color: var(--text-2); }
+.t-body    { font-family: var(--font-body); font-weight: var(--fw-regular);  font-size: var(--fs-body);    line-height: var(--lh-normal); }
+.t-small   { font-family: var(--font-body); font-weight: var(--fw-regular);  font-size: var(--fs-small);   line-height: var(--lh-snug);   color: var(--text-2); }
+.t-caption { font-family: var(--font-head); font-weight: var(--fw-semibold); font-size: var(--fs-caption); line-height: var(--lh-snug);   letter-spacing: var(--ls-wider); text-transform: uppercase; color: var(--brand-2); }
+
+/* ============================================================
+   ANIMATION UTILITIES
+   Единни keyframes + класове. Една скорост, едно timing.
+   ============================================================ */
+@keyframes ds-fade      { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ds-slide-up  { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes ds-scale-in  { from { opacity: 0; transform: scale(0.96); }      to { opacity: 1; transform: none; } }
+@keyframes ds-glow      { 0%, 100% { box-shadow: var(--glow-brand); } 50% { box-shadow: var(--glow-premium); } }
+
+.u-fade      { animation: ds-fade var(--dur-slow) var(--ease-out) both; }
+.u-slide-up  { animation: ds-slide-up var(--dur-slower) var(--ease-out) both; }
+.u-scale-in  { animation: ds-scale-in var(--dur-slow) var(--ease-out) both; }
+.u-glow      { animation: ds-glow 3s var(--ease) infinite; }
+
+/* Hover primitives — един стандарт за целия сайт */
+.u-hover-lift  { transition: transform var(--dur) var(--ease), box-shadow var(--dur-slow) var(--ease), border-color var(--dur-slow) var(--ease); }
+.u-hover-lift:hover { transform: translateY(-6px); box-shadow: var(--glow-premium); border-color: var(--brand-border); }
+.u-hover-scale { transition: transform var(--dur) var(--ease); }
+.u-hover-scale:hover { transform: scale(1.04); }
+
+@media (prefers-reduced-motion: reduce) {
+  .u-fade, .u-slide-up, .u-scale-in, .u-glow { animation: none; opacity: 1; transform: none; }
+}

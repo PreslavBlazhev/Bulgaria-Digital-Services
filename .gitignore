@@ -1,0 +1,24 @@
+# ---- Изход от build ----
+dist/
+
+# ---- Тайни и креденшъли ----
+.env
+.env.*
+*.key
+*.pem
+secrets.json
+credentials.json
+tools/**/secrets.*
+
+# ---- Локални QA артефакти ----
+tools/out/
+*.qa.json
+*.local.json
+.claude/settings.local.json
+
+# ---- OS / редактор ----
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.bak
+*.tmp

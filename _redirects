@@ -1,0 +1,24 @@
+# Bulgaria Digital Services — Netlify redirects
+#
+# ПУБЛИЧНИЯТ АДРЕС НА ФУНИЯТА Е /restaurants (без .html).
+# Него сочат: canonical, og:url, sitemap.xml, вътрешните връзки и
+# рекламните обяви. Всичко останало води към него, за да няма две
+# конкуриращи се версии на една и съща страница.
+#
+# Внимание за `!`: когато файлът съществува (restaurants.html), Netlify
+# по подразбиране го сервира и НЕ прилага правилото. Удивителната
+# принуждава пренасочването. Без нея правилата отдолу са мъртви.
+#
+# Цикъл няма: правилата хващат `/restaurants.html`, `/restaurants/` и
+# `/restaurants/thank-you*`, а целта `/restaurants` не съвпада с нито
+# едно от тях — Netlify я сервира от restaurants.html.
+
+# .html вариантът → чистия адрес
+/restaurants.html             /restaurants             301!
+/restaurants/thank-you.html   /restaurants/thank-you   301!
+
+# Завършваща наклонена черта. `/restaurants/` кара Netlify да търси
+# `restaurants/index.html`, който не съществува — папката съдържа само
+# thank-you.html. Без тези правила и двата адреса дават 404.
+/restaurants/             /restaurants             301
+/restaurants/thank-you/   /restaurants/thank-you   301
