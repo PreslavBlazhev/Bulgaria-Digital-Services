@@ -61,13 +61,13 @@ Lead ID (BDS-2026-XXXXXX)
 | `tools/crm/Sales.gs` | автоматиката при смяна на статус + номера на оферти |
 | `tools/crm/Marketing.gs` | преизчислява `Marketing Daily` от `Leads` и `Raw Ads` |
 | `tools/crm/QaTest.gs` | самопроверка на живо — минава цялото пътуване и се чисти |
-| `tools/ads/MetaImport.gs` | внос от Meta (чака рекламен акаунт) |
+| `tools/ads/MetaImport.gs` | внос от Meta — **BLOCKED**, няма рекламен акаунт |
 
 ### Извън таблицата
 
 | Файл | Къде се пуска |
 |---|---|
-| `tools/ads/google-ads-script.js` | Google Ads → Tools → Bulk actions → Scripts |
+| `tools/ads/google-ads-script.js` | Google Ads → Tools → Bulk actions → Scripts — **BLOCKED**, няма акаунт (потвърдено 28.08.2026) |
 | `tools/generate-proposal.mjs` | локално, произвежда офертата като HTML |
 
 ### Проверки
