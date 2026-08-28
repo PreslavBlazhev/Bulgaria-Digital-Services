@@ -47,6 +47,11 @@ function bdsSheet_(ss, name) {
 
 /** Заглавен ред: пише липсващите колони, НЕ мести съществуващите. */
 function bdsEnsureHeader_(sheet, columns) {
+  /* Нов лист идва с 26 колони. Leads иска 46 — без това дописване
+     първото пускане би гръмнало с „range out of bounds“. */
+  if (sheet.getMaxColumns() < columns.length) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), columns.length - sheet.getMaxColumns());
+  }
   var width = Math.max(sheet.getLastColumn(), 1);
   var current = sheet.getRange(1, 1, 1, width).getValues()[0];
   var changed = false;

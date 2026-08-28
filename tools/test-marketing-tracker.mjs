@@ -166,6 +166,10 @@ check('CAC формулата дели разход на клиенти', /\$E\$
 check('ROAS формулата дели приход на разход', /\$N\$2:\$N\/\$E\$2:\$E/.test(setup));
 check('приносът вади разхода от прихода', /N\(\$N\$2:\$N\)-N\(\$E\$2:\$E\)/.test(setup));
 check('делението на нула е поето с IFERROR', (setup.match(/IFERROR/g) || []).length >= 5);
+check('нов лист се разширява до нужния брой колони преди запис',
+  /insertColumnsAfter\(sheet\.getMaxColumns\(\)/.test(setup));
+check('Leads иска повече от 26-те колони по подразбиране',
+  L.BDS_LEAD_COLUMNS.length > 26, L.BDS_LEAD_COLUMNS.length + ' колони');
 check('Status има истинско падащо меню',
   /requireValueInList\(BDS_STATUSES/.test(setup));
 check('Channel има падащо меню', /requireValueInList\(BDS_CHANNELS/.test(setup));
