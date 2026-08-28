@@ -1,6 +1,9 @@
-﻿Date,Channel,Campaign,Spend,Impressions,Clicks,CTR,CPC,Leads,CPL,Clients,CAC,Revenue,ROAS,Marketing Contribution,Notes
-,Google Ads,,,,,,,,,,,,,,
-,Meta Ads,,,,,,,,,,,,,,
-,Organic,,0,,,,,,,,,,,,
-,Referral,,0,,,,,,,,,,,,
-,Direct,,0,,,,,,,,,,,,
+﻿Date,Channel,Campaign ID,Campaign,Spend,Impressions,Clicks,CTR,CPC,Leads,CPL,Clients,CAC,Revenue,ROAS,Marketing Contribution,Notes
+,Google Ads,,,,,,,,,,,,,,,
+,Meta Ads,,,,,,,,,,,,,,,
+,Organic Google,,,,,,,,,,,,,,,
+,Instagram,,,,,,,,,,,,,,,
+,Facebook,,,,,,,,,,,,,,,
+,Referral,,,,,,,,,,,,,,,
+,Direct,,,,,,,,,,,,,,,
+,Other,,,,,,,,,,,,,,,

@@ -86,7 +86,8 @@ for (const d of COPY_DIRS) {
 
 /* ---------- Проверка, че нищо вътрешно не е влязло ---------- */
 const MUST_NOT_SHIP = ['marketing', 'tools', 'PRICES AND PACKETS', 'logo',
-  'bds_master_command.txt', 'readme.md', 'server.js', 'dist'];
+  'bds_master_command.txt', 'readme.md', 'server.js', 'dist',
+  'OPERATIONS.md', '.git', '.gitignore'];
 const leaked = MUST_NOT_SHIP.filter(x => fs.existsSync(path.join(DIST, x)));
 
 /* Втора проверка: търсим текст от вътрешните документи вътре в dist. */

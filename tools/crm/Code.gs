@@ -1,70 +1,23 @@
 /* ============================================================
-   BDS CRM — Google Apps Script Web App
+   BDS CRM — Google Apps Script Web App (Code.gs)
    ------------------------------------------------------------
    Приема заявките от формата на /restaurants и ги записва като
-   редове в Google Sheet. Това е CRM-ът: таблицата е базата,
-   този скрипт е входът към нея.
+   редове в лист Leads. Това е входът към CRM-а.
 
-   Защо Apps Script, а не директно към Airtable/HubSpot:
-   сайтът е статичен. Всеки друг вариант иска API ключ, а ключ в
-   браузъра е публичен ключ. Web App адресът тук не е тайна — той
-   само ДОБАВЯ редове и не връща нищо от базата.
+   Защо Apps Script, а не Airtable/HubSpot: сайтът е статичен.
+   Всеки друг вариант иска API ключ, а ключ в браузъра е публичен
+   ключ. Този адрес не е тайна — той само ДОБАВЯ редове и не връща
+   нищо от базата.
+
+   Схемата на колоните живее в Logic.gs. Тук не се преписва.
+
+   ВАЖНО за реда на файловете: Apps Script изпълнява файловете по
+   азбучен ред, а Code.gs е първи. Затова тук НЕ се пипа нищо от
+   Logic.gs на ниво файл — само вътре във функции, които се викат
+   след като всичко е заредено.
 
    Инсталация: виж SETUP.md в същата папка.
    ============================================================ */
-
-/* Име на листа, в който влизат заявките. */
-var SHEET_NAME = 'Leads';
-
-/* Ред 1 на листа. Редът на колоните ТУК определя реда в таблицата.
-   Добавяй нови колони само НАКРАЯ — иначе старите редове се разместват. */
-var COLUMNS = [
-  'Lead ID',
-  'Created Date',
-  'Lead Owner',
-  'Status',
-  'Contact Name',
-  'Business Name',
-  'Phone',
-  'Email',
-  'Service Interest',
-  'Budget',
-  'Has Website',
-  'Website URL',
-  'Source Category',
-  'Source',
-  'Medium',
-  'Campaign',
-  'Content',
-  'Term',
-  'GCLID',
-  'Landing Page',
-  'Referrer',
-  'First Source Category',
-  'First Source',
-  'First Medium',
-  'First Campaign',
-  'First Landing Page',
-  'First Touch At',
-  'Current Setup',
-  'Main Problem',
-  'Desired Outcome',
-  'Timeline',
-  'Decision Maker',
-  'Next Action',
-  'Follow-up Date',
-  'Last Contact Date',
-  'Notes',
-  'Deal Value',
-  'Close Date',
-  'Won/Lost',
-  'Lost Reason',
-  'Client',
-  'Proposal ID',
-  'Proposal Date',
-  'Proposal Value',
-  'Proposal Validity'
-];
 
 /* Полетата, които идват автоматично от сайта. Всичко останало се
    попълва от човек по време на продажбата. */
@@ -95,16 +48,26 @@ var FROM_SITE = {
   'First Touch At': 'first_touch_at'
 };
 
-function getSheet_() {
+/* Стойностите, с които всяка нова заявка тръгва. */
+var LEAD_DEFAULTS = {
+  'Lead Owner': 'Преслав Блажев',
+  'Status': 'New',
+  'Next Action': 'Първо обаждане',
+  'Client': 'Не'
+};
+
+function getLeadsSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(SHEET_NAME);
+  var sheet = ss.getSheetByName(BDS_SHEETS.leads);
   if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
+    /* Липсващ лист значи, че таблицата не е построена. Строим я цялата,
+       вместо да сглобим половин лист без падащи менюта и формули. */
+    setupBdsOperations();
+    sheet = ss.getSheetByName(BDS_SHEETS.leads);
   }
-  /* Заглавен ред — създава се веднъж и не се пипа после. */
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(COLUMNS);
-    sheet.getRange(1, 1, 1, COLUMNS.length).setFontWeight('bold');
+    sheet.appendRow(BDS_LEAD_COLUMNS);
+    sheet.getRange(1, 1, 1, BDS_LEAD_COLUMNS.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
   }
   return sheet;
@@ -126,7 +89,7 @@ function findRowByLeadId_(sheet, leadId) {
 function doPost(e) {
   var lock = LockService.getScriptLock();
   try {
-    /* Две заявки в една и съща секунда иначе биха писали на един и същи ред. */
+    /* Две заявки в една и съща секунда иначе биха писали на един ред. */
     lock.waitLock(20000);
   } catch (err) {
     return json_({ ok: false, error: 'busy' });
@@ -144,8 +107,9 @@ function doPost(e) {
        успех, за да не му подскажем, но не записваме нищо. */
     if (body._honey) return json_({ ok: true, skipped: 'honeypot' });
 
-    var sheet = getSheet_();
+    var sheet = getLeadsSheet_();
     var leadId = String(body.lead_id || '').trim();
+    if (!leadId) return json_({ ok: false, error: 'missing lead_id' });
 
     var existing = findRowByLeadId_(sheet, leadId);
     if (existing) {
@@ -153,19 +117,26 @@ function doPost(e) {
     }
 
     var row = [];
-    for (var i = 0; i < COLUMNS.length; i++) {
-      var col = COLUMNS[i];
+    for (var i = 0; i < BDS_LEAD_COLUMNS.length; i++) {
+      var col = BDS_LEAD_COLUMNS[i];
       if (col === 'Created Date') { row.push(new Date()); continue; }
-      if (col === 'Lead Owner') { row.push('Преслав Блажев'); continue; }
-      if (col === 'Status') { row.push('New'); continue; }
-      if (col === 'Next Action') { row.push('Първо обаждане'); continue; }
-      if (col === 'Client') { row.push('Не'); continue; }
+      if (LEAD_DEFAULTS.hasOwnProperty(col)) { row.push(LEAD_DEFAULTS[col]); continue; }
       var key = FROM_SITE[col];
       row.push(key && body[key] != null ? String(body[key]) : '');
     }
 
     sheet.appendRow(row);
-    return json_({ ok: true, lead_id: leadId, row: sheet.getLastRow() });
+    var written = sheet.getLastRow();
+
+    /* Заявката влиза веднага в маркетинговите числа — иначе таблото
+       щеше да я показва чак след първата ръчна редакция. */
+    try {
+      rebuildMarketingFromCrm();
+    } catch (err2) {
+      Logger.log('rebuild след нова заявка: ' + err2);
+    }
+
+    return json_({ ok: true, lead_id: leadId, row: written });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   } finally {
@@ -174,18 +145,62 @@ function doPost(e) {
 }
 
 /** Проверка, че адресът работи: отвори го в браузър. */
-function doGet() {
-  var sheet = getSheet_();
+function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var leads = ss.getSheetByName(BDS_SHEETS.leads);
+  var md = ss.getSheetByName(BDS_SHEETS.marketing);
+  var raw = ss.getSheetByName(BDS_SHEETS.rawAds);
+
   return json_({
     ok: true,
-    service: 'BDS CRM',
-    sheet: SHEET_NAME,
-    leads: Math.max(0, sheet.getLastRow() - 1)
+    service: 'BDS Operations',
+    spreadsheet: ss.getName(),
+    sheets: ss.getSheets().map(function (s) { return s.getName(); }),
+    leads: leads ? Math.max(0, leads.getLastRow() - 1) : 0,
+    marketing_rows: md ? Math.max(0, md.getLastRow() - 1) : 0,
+    raw_ads_rows: raw ? Math.max(0, raw.getLastRow() - 1) : 0,
+    columns_ok: leads ? bdsHeaderMatches_(leads, BDS_LEAD_COLUMNS) : false,
+    statuses: BDS_STATUSES,
+    channels: BDS_CHANNELS
   });
+}
+
+function bdsHeaderMatches_(sheet, columns) {
+  if (sheet.getLastColumn() < columns.length) return false;
+  var head = sheet.getRange(1, 1, 1, columns.length).getValues()[0];
+  for (var i = 0; i < columns.length; i++) {
+    if (String(head[i]) !== columns[i]) return false;
+  }
+  return true;
 }
 
 function json_(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ------------------------------------------------------------
+   Ежедневно преизчисляване. Слага се като времеви тригер от
+   installDailyRebuild() — виж SETUP.md.
+   ------------------------------------------------------------ */
+
+function dailyRebuild() {
+  recheckAllLeadHealth();
+  return rebuildMarketingFromCrm();
+}
+
+/** Пуска се веднъж на ръка. Слага дневен тригер и не дублира стария. */
+function installDailyRebuild() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'dailyRebuild') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  ScriptApp.newTrigger('dailyRebuild').timeBased().atHour(6).everyDays(1).create();
+  var msg = 'Дневният преизчислител е включен — всяка сутрин около 6:00.';
+  Logger.log(msg);
+  try { SpreadsheetApp.getUi().alert(msg); } catch (e) {}
+  return msg;
 }
