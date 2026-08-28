@@ -130,11 +130,48 @@ check('нова заявка веднага влиза в маркетингов
 check('има дневен тригер за преизчисляване',
   /function installDailyRebuild\(/.test(code) && /timeBased\(\)/.test(code));
 
+/* ------------------------------------------------------------
+   Служебните команди пишат в таблицата. Адресът на Web App-а не е
+   тайна, затова той не може да е единственото, което ги пази.
+   ------------------------------------------------------------ */
+G('Служебни команди');
+
+check('заявка от сайта и служебна команда вървят по различни пътища',
+  /if \(body\.action\) return bdsOpsRouter_\(body\);/.test(code) &&
+  /function bdsIntakeLead_\(/.test(code));
+check('без ключ командите са изключени',
+  /ops disabled/.test(code));
+check('грешен ключ се отхвърля',
+  /!== expected[\s\S]{0,120}forbidden/.test(code));
+check('ключът живее в Script Properties, не в кода',
+  /getProperty\('BDS_OPS_TOKEN'\)/.test(code) &&
+  ![...code.matchAll(/'([A-Za-z0-9]{24,})'/g)].length);
+check('ключът се създава от самия скрипт', /Utilities\.getUuid\(\)/.test(code));
+
+const opsState = code.slice(code.indexOf('function bdsOpsState_'), code.indexOf('/** Проверка, че адресът работи'));
+check('състоянието не връща имена, телефони и имейли',
+  !/'Contact Name'|'Phone'|'Email'/.test(opsState));
+check('състоянието връща това, което е нужно за проверка',
+  ["'Status'", "'Deal Value'", "'Close Date'", "'Client'", "'Proposal ID'"]
+    .every(k => opsState.includes(k)));
+check('състоянието брои фантомните редове', /phantom_rows/.test(opsState));
+
 G('Тайни');
 check('в Code.gs няма записан Spreadsheet ID',
   !/[01][a-zA-Z0-9_-]{25,}/.test(code));
-check('в Code.gs няма ключове или токени',
-  !/api[_-]?key|secret|token|password/i.test(code));
+/* Думата „token“ я има — служебният ключ се ЧЕТЕ тук. Търсим самата
+   стойност: дълъг непрозрачен литерал. */
+/* Дълъг низ без нито една цифра и само с малки букви е име на поле
+   (`first_source_category`), не ключ. Ключът тук е шестнайсетичен —
+   винаги има цифри. */
+const codeLiterals = [...code.replace(/\/\*[\s\S]*?\*\//g, '')
+  .matchAll(/'([A-Za-z0-9_\-]{20,})'/g)]
+  .map(m => m[1])
+  .filter(s => /\d/.test(s) || /[a-z]/.test(s) === /[A-Z]/.test(s));
+check('в Code.gs няма записана стойност на ключ',
+  codeLiterals.length === 0, codeLiterals.join(', '));
+check('ключът само се чете от хранилището, не се пише в кода',
+  /PropertiesService\.getScriptProperties\(\)/.test(code));
 /* doGet е публичен адрес. Той може да каже КОЛКО заявки има, но не и
    какви са — иначе всеки с адреса чете клиентските данни. */
 const doGetBody = code.slice(code.indexOf('function doGet'), code.indexOf('function bdsHeaderMatches_'));

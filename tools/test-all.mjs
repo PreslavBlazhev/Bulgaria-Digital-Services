@@ -31,6 +31,12 @@ const SUITES = [
   { name: 'Внос на реклами (Phase 19)', file: 'tools/test-ads-import.mjs', args: [] }
 ];
 
+/* Проверките срещу живата таблица искат служебен ключ. Без него
+   няма смисъл да се пускат — само биха мигали в жълто. */
+if (process.env.BDS_OPS_TOKEN) {
+  SUITES.push({ name: 'Живата таблица (18 · 20 · 17)', file: 'tools/test-live-ops.mjs', args: [] });
+}
+
 const results = [];
 for (const suite of SUITES) {
   console.log('\n' + '═'.repeat(64));

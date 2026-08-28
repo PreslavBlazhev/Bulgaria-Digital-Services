@@ -76,6 +76,7 @@ Lead ID (BDS-2026-XXXXXX)
 node tools/test-all.mjs                 всичко наведнъж
 node tools/test-all.mjs --browser       + браузърните тестове
 node tools/test-all.mjs --live          + истинска заявка към CRM-а
+BDS_OPS_TOKEN=xxx node tools/test-live-ops.mjs   срещу живата таблица
 ```
 
 | Тест | Какво пази |
@@ -85,6 +86,7 @@ node tools/test-all.mjs --live          + истинска заявка към C
 | `test-marketing-pipeline.mjs` | че второ пускане не удвоява и изтрито изчезва |
 | `test-proposal-workflow.mjs` | номера, валидността, цената |
 | `test-ads-import.mjs` | че двете реализации на UPSERT-а не са се разминали |
+| `test-live-ops.mjs` | цялото пътуване в **истинската** таблица, без нито един макет |
 
 ---
 
