@@ -206,6 +206,29 @@ check('изпраща първото докосване', /first_source_category
 check('FormSubmit остава като резерва',
   /formsubmit\.co/.test(appJs) && appJs.indexOf('LEAD_ENDPOINT') < appJs.indexOf('CRM_ENDPOINT'));
 
+/* ------------------------------------------------------------
+   Тестовете не бива да пишат в живата таблица.
+
+   Fetch.enable ЗАМЕНЯ списъка с шаблони. Второ извикване някъде
+   по-нататък отменя предишните и заявките тръгват навън — така три
+   тестови заявки се озоваха в истинския CRM, преди да се забележи.
+   ------------------------------------------------------------ */
+G('Браузърните тестове не пипат живата таблица');
+
+const funnelTest = read('tools/test-restaurant-funnel.mjs');
+/* Броим ИЗВИКВАНИЯ, не споменавания — коментарът горе обяснява точно
+   този капан и не бива да се брои за него. */
+const enableCalls = [...funnelTest.matchAll(/send\('Fetch\.enable'/g)].length;
+check('Fetch.enable се вика точно веднъж', enableCalls === 1, enableCalls + ' извиквания');
+check('шаблоните покриват и FormSubmit, и CRM-а',
+  /urlPattern: '\*formsubmit\.co\*'[\s\S]{0,80}urlPattern: '\*script\.google\.com\*'/.test(funnelTest));
+check('заявките към CRM-а се подменят, не се пускат навън',
+  /script\\\.google\\\.com[\s\S]{0,400}Fetch\.fulfillRequest/.test(funnelTest));
+check('прихващането важи за ВСЯКА сесия, не само за CRM теста',
+  funnelTest.indexOf('Fetch.enable') < funnelTest.indexOf("G('Браузър — CRM')"));
+check('няма останал шаблон, подаван отвън',
+  !/extraPatterns/.test(funnelTest));
+
 /* Всяко поле, което CRM-ът очаква от сайта, наистина се праща. */
 const fromSite = [...code.matchAll(/'([^']+)': '([a-z_]+)'/g)]
   .filter(m => L.BDS_LEAD_COLUMNS.includes(m[1]))

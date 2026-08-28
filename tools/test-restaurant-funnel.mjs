@@ -333,7 +333,7 @@ async function browserTests(base) {
        табовете, значи без това събитията от предишен тест изтичат в следващия. */
     const KEY = '__qa_events_' + (++sessionSeq);
     const p = await newPage(chrome.port);
-    const errs = []; const posts = [];
+    const errs = []; const posts = []; const crmPosts = [];
     p.on(m => {
       if (m.method === 'Runtime.exceptionThrown') errs.push(m.params.exceptionDetails.exception?.description || m.params.exceptionDetails.text);
       if (m.method === 'Log.entryAdded' && m.params.entry.level === 'error') errs.push(m.params.entry.text);
@@ -344,17 +344,36 @@ async function browserTests(base) {
        подразбиране е — а това крие поведението, което искаме да тестваме. */
     await p.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
     /* Fetch.enable ЗАМЕНЯ списъка с шаблони, не го допълва. Затова всички
-       адреси, които някой тест иска да прихване, се подават ТУК, наведнъж.
-       Второ извикване по-нататък би отменило този шаблон и заявките към
-       FormSubmit биха тръгнали към истинския сървър — тоест истински имейл
-       при всяко пускане на тестовете. */
+       адреси се подават ТУК, наведнъж, и то за ВСЯКА сесия.
+
+       И двата адреса се прихващат винаги, не само в теста, който се
+       занимава с тях:
+
+         formsubmit.co      иначе тестът праща истински имейл;
+         script.google.com  иначе тестът пише истински ред в живия CRM.
+
+       Първата версия прихващаше CRM-а само в CRM теста. Другите сесии
+       също изпращат формата — и три тестови заявки се озоваха в
+       истинската таблица, преди това да се забележи. */
     await p.send('Fetch.enable', {
-      patterns: [{ urlPattern: '*formsubmit.co*' }, ...(opts.extraPatterns || [])]
+      patterns: [{ urlPattern: '*formsubmit.co*' }, { urlPattern: '*script.google.com*' }]
     });
     p.on(async m => {
       if (m.method !== 'Fetch.requestPaused') return;
-      /* Този обработчик отговаря само за FormSubmit. Другите прихванати
-         адреси се обслужват от теста, който ги е поискал. */
+
+      /* CRM-ът се спира тук, при всяка сесия, и никога не тръгва навън. */
+      if (/script\.google\.com/.test(m.params.request.url)) {
+        if (m.params.request.method === 'POST') crmPosts.push(m.params.request.postData);
+        try {
+          await p.send('Fetch.fulfillRequest', {
+            requestId: m.params.requestId, responseCode: 200,
+            responseHeaders: [{ name: 'Content-Type', value: 'application/json' },
+              { name: 'Access-Control-Allow-Origin', value: '*' }],
+            body: Buffer.from('{"ok":true}').toString('base64'),
+          });
+        } catch {}
+        return;
+      }
       if (!/formsubmit\.co/.test(m.params.request.url)) return;
       const CORS = [{ name: 'Access-Control-Allow-Origin', value: '*' },
         { name: 'Access-Control-Allow-Methods', value: 'POST, OPTIONS' },
@@ -380,7 +399,7 @@ async function browserTests(base) {
         for(var i=0;i<arguments.length;i++){var a=arguments[i];if(a&&a.event)r.push(a);}
         localStorage.setItem('${KEY}',JSON.stringify(r));}catch(e){}return _p.apply(null,arguments);};})();`,
     });
-    try { await fn(p, () => errs, () => posts, KEY); } finally { p.close(); }
+    try { await fn(p, () => errs, () => posts, KEY, () => crmPosts); } finally { p.close(); }
   }
 
   const go = async (p, url, wait = 2200) => { await p.send('Page.navigate', { url }); await sleep(wait); };
@@ -529,21 +548,8 @@ async function browserTests(base) {
     } else {
       /* Свързан е — прихващаме адреса и проверяваме какво реално заминава. */
       const host = configured[1];
-      await session(async (p, errs, posts) => {
-        const crmPosts = [];
-        p.on(async m => {
-          if (m.method !== 'Fetch.requestPaused') return;
-          if (!/script\.google\.com/.test(m.params.request.url)) return;
-          if (m.params.request.method === 'POST') crmPosts.push(m.params.request.postData);
-          try {
-            await p.send('Fetch.fulfillRequest', {
-              requestId: m.params.requestId, responseCode: 200,
-              responseHeaders: [{ name: 'Content-Type', value: 'application/json' },
-                { name: 'Access-Control-Allow-Origin', value: '*' }],
-              body: Buffer.from('{"ok":true}').toString('base64'),
-            });
-          } catch {}
-        });
+      await session(async (p, errs, posts, KEY, crm) => {
+        const crmPosts = crm();          /* прихванато от самата сесия */
         await go(p, AD);
         await p.eval(FILL);
         await p.eval("document.getElementById('restaurantForm').requestSubmit()");
@@ -565,7 +571,7 @@ async function browserTests(base) {
           check('Lead ID в CRM и в имейла съвпадат',
             b.lead_id === emailBody['Lead ID'], b.lead_id + ' / ' + emailBody['Lead ID']);
         }
-      }, { extraPatterns: [{ urlPattern: '*script.google.com*' }] });
+      });
     }
   }
 
