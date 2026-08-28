@@ -343,9 +343,19 @@ async function browserTests(base) {
     /* Реалният посетител почти никога не е с намалена анимация; headless по
        подразбиране е — а това крие поведението, което искаме да тестваме. */
     await p.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
-    await p.send('Fetch.enable', { patterns: [{ urlPattern: '*formsubmit.co*' }] });
+    /* Fetch.enable ЗАМЕНЯ списъка с шаблони, не го допълва. Затова всички
+       адреси, които някой тест иска да прихване, се подават ТУК, наведнъж.
+       Второ извикване по-нататък би отменило този шаблон и заявките към
+       FormSubmit биха тръгнали към истинския сървър — тоест истински имейл
+       при всяко пускане на тестовете. */
+    await p.send('Fetch.enable', {
+      patterns: [{ urlPattern: '*formsubmit.co*' }, ...(opts.extraPatterns || [])]
+    });
     p.on(async m => {
       if (m.method !== 'Fetch.requestPaused') return;
+      /* Този обработчик отговаря само за FormSubmit. Другите прихванати
+         адреси се обслужват от теста, който ги е поискал. */
+      if (!/formsubmit\.co/.test(m.params.request.url)) return;
       const CORS = [{ name: 'Access-Control-Allow-Origin', value: '*' },
         { name: 'Access-Control-Allow-Methods', value: 'POST, OPTIONS' },
         { name: 'Access-Control-Allow-Headers', value: 'Content-Type, Accept' }];
@@ -521,7 +531,6 @@ async function browserTests(base) {
       const host = configured[1];
       await session(async (p, errs, posts) => {
         const crmPosts = [];
-        await p.send('Fetch.enable', { patterns: [{ urlPattern: '*script.google.com*' }] });
         p.on(async m => {
           if (m.method !== 'Fetch.requestPaused') return;
           if (!/script\.google\.com/.test(m.params.request.url)) return;
@@ -556,7 +565,7 @@ async function browserTests(base) {
           check('Lead ID в CRM и в имейла съвпадат',
             b.lead_id === emailBody['Lead ID'], b.lead_id + ' / ' + emailBody['Lead ID']);
         }
-      });
+      }, { extraPatterns: [{ urlPattern: '*script.google.com*' }] });
     }
   }
 
