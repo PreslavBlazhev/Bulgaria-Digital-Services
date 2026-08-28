@@ -56,6 +56,29 @@ if (!TOKEN) {
   process.exit(1);
 }
 
+/** Apps Script понякога връща JSON-а увит в HTML страница (userContent
+    wrapper). Не е грешка и не зависи от нас — просто трябва да се
+    очаква и от двете страни. */
+function unwrapJson(text) {
+  const trimmed = text.trim();
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) return JSON.parse(trimmed);
+
+  const stripped = text
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ');
+  const start = stripped.indexOf('{');
+  const end = stripped.lastIndexOf('}');
+  if (start >= 0 && end > start) {
+    const candidate = stripped.slice(start, end + 1)
+      .replace(/&quot;/g, '"').replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&#39;/g, "'");
+    return JSON.parse(candidate);
+  }
+  throw new Error('таблицата отговори с нещо, което не е JSON:\n' + text.slice(0, 400));
+}
+
 /** Една служебна команда към таблицата. */
 async function ops(action, extra = {}) {
   const res = await fetch(ENDPOINT, {
@@ -64,12 +87,7 @@ async function ops(action, extra = {}) {
     body: JSON.stringify({ action, token: TOKEN, ...extra }),
     redirect: 'follow'
   });
-  const text = await res.text();
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error('таблицата отговори с нещо, което не е JSON:\n' + text.slice(0, 400));
-  }
+  return unwrapJson(await res.text());
 }
 
 const mdRow = (state, campaignId) =>
@@ -121,10 +139,27 @@ G('Изходно състояние');
 
 let before = await ops('state');
 check('състоянието се чете', before.ok === true);
+
+/* Следата от ARRAYFORMULA се чисти от setupBdsOperations(). Щом мога
+   да я пусна отдалеч, няма причина да я искам от човек. */
+if (before.counts.phantom_rows > 0) {
+  console.log('\x1b[2m  ' + before.counts.phantom_rows +
+    ' фантомни реда — пускам setupBdsOperations() и проверявам пак\x1b[0m');
+  const fix = await ops('setup');
+  check('пресглобяването на листовете минава', fix.ok === true, fix.error || '');
+  before = await ops('state');
+}
 check('няма фантомни редове в Marketing Daily',
   before.counts.phantom_rows === 0,
   'зает до ред ' + before.counts.marketing_last_row +
   ', данни ' + before.counts.marketing);
+/* Ред от предишен тест също се чисти отдалеч, вместо да се търси на ръка. */
+if (before.leads.some(l => /^BDS-(QA|SELFTEST)-/.test(l.lead_id))) {
+  console.log('\x1b[2m  има останали тестови заявки — чистя\x1b[0m');
+  const cleaned = await ops('cleanup');
+  check('изчистването минава', cleaned.ok === true, cleaned.message || cleaned.error);
+  before = await ops('state');
+}
 check('няма останали тестови заявки',
   !before.leads.some(l => /^BDS-(QA|SELFTEST)-/.test(l.lead_id)),
   before.leads.map(l => l.lead_id).join(', ') || 'нула заявки');
@@ -155,6 +190,15 @@ check('самопроверката стига до края',
 const step = (label, needle) =>
   check(label, new RegExp('ok\\s+' + needle).test(report), needle);
 
+G('Phase 18 — показателите в живите клетки');
+step('показванията и кликовете влизат', 'показванията и кликовете влизат');
+step('CTR се смята в клетката', 'CTR = 96 / 2400 = 4%');
+step('CPC се смята в клетката', 'CPC = 36 / 96 = 0.375');
+step('CPL се смята в клетката', 'CPL = 36 / 1 = 36');
+step('липсващ показател е празен, не нула', 'празните показатели са празни, не нули');
+step('Marketing Contribution е отрицателен преди приход', 'принос = −36');
+
+G('Phase 20 — пътуването');
 step('Status = New при пристигане', 'Status = New');
 step('Lead Owner е попълнен', 'Lead Owner = Преслав Блажев');
 step('Next Action е попълнено', 'Next Action = Първо обаждане');
@@ -171,7 +215,27 @@ step('второто преизчисляване не удвоява', 'таб�
 step('клиентите не стават 3', 'клиентите остават 1');
 step('приходът не става 1350', 'приходът остава 450');
 step('след изтриване приходът пада на 0', 'приходът пада на 0');
+step('след изтриване клиентите падат на 0', 'клиентите падат на 0');
 step('разходът остава непокътнат', 'разходът остава непокътнат');
+
+/* ---- Phase 17: номерът, издаден от ЖИВАТА таблица ---- */
+G('Phase 17 — офертата, издадена на живо');
+
+const issued = /номерът се издава сам\s+\[([^\]]+)\]/.exec(report);
+check('таблицата издаде номер на оферта', !!issued, issued ? issued[1] : 'не намерен в отчета');
+if (issued) {
+  const liveProposalId = issued[1].trim();
+  check('форматът е BDS-PROP-ГГГГ-NNNN',
+    L.bdsIsProposalId(liveProposalId), liveProposalId);
+  check('номерът е за текущата година',
+    liveProposalId.startsWith('BDS-PROP-' + new Date().getFullYear() + '-'), liveProposalId);
+  check('номерът не съдържа лични данни', !/[а-яА-Я@]/.test(liveProposalId));
+  process.env.__BDS_LIVE_PROPOSAL_ID = liveProposalId;
+}
+step('датата на офертата се слага сама', 'датата се слага сама');
+step('валидността е +14 календарни дни', 'валидността е \\+14');
+step('липсваща стойност на офертата се маркира', 'Health иска стойност на офертата');
+step('след попълване Health е чиста', 'след попълване Health е чиста');
 
 /* ============================================================
    4. Проверка отвън — не вярваме на отчета за думите му

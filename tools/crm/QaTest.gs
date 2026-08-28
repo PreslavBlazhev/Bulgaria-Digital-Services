@@ -148,8 +148,16 @@ function runBdsSelfTest() {
       bdsNum(m['Leads']) === 1 && bdsNum(m['Spend']) === QA_SPEND,
       'Leads=' + m['Leads'] + ' Spend=' + m['Spend']);
     ok('Campaign ID дойде от рекламните данни', String(m['Campaign ID']) === QA_CAMPAIGN_ID);
+    ok('показванията и кликовете влизат',
+      bdsNum(m['Impressions']) === 2400 && bdsNum(m['Clicks']) === 96,
+      m['Impressions'] + ' / ' + m['Clicks']);
+    ok('CTR = 96 / 2400 = 4%', Math.abs(bdsNum(m['CTR']) - 0.04) < 1e-9, String(m['CTR']));
+    ok('CPC = 36 / 96 = 0.375', Math.abs(bdsNum(m['CPC']) - 0.375) < 1e-9, String(m['CPC']));
     ok('CPL = 36 / 1 = 36', bdsNum(m['CPL']) === 36, String(m['CPL']));
     ok('CAC още няма стойност — няма клиент', String(m['CAC'] || '') === '', String(m['CAC']));
+    /* Празно, не нула: липсващият показател е различен от измерена нула. */
+    ok('празните показатели са празни, не нули',
+      String(m['CAC'] || '') === '' && bdsNum(m['CPL']) === 36);
     ok('ROAS е 0 — разход без приход', bdsNum(m['ROAS']) === 0, String(m['ROAS']));
     ok('принос = −36', bdsNum(m['Marketing Contribution']) === -QA_SPEND, String(m['Marketing Contribution']));
 
