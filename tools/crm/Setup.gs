@@ -205,24 +205,17 @@ function setupRawAdsSheet_(ss) {
 
 function setupMarketingSheet_(ss) {
   var sh = bdsSheet_(ss, BDS_SHEETS.marketing);
-  bdsEnsureHeader_(sh, BDS_MARKETING_COLUMNS);
 
-  /* Изведените показатели. Празен ред -> празна клетка, за да не
-     се пълни листът с нули под последния истински ред.
-     IFERROR поема делението на нула: без данни няма показател. */
-  var f = {
-    H: '={"CTR"; ARRAYFORMULA(IF(LEN($A$2:$A)=0,"",IFERROR($G$2:$G/$F$2:$F,"")))}',
-    I: '={"CPC"; ARRAYFORMULA(IF(LEN($A$2:$A)=0,"",IFERROR($E$2:$E/$G$2:$G,"")))}',
-    K: '={"CPL"; ARRAYFORMULA(IF(LEN($A$2:$A)=0,"",IFERROR($E$2:$E/$J$2:$J,"")))}',
-    M: '={"CAC"; ARRAYFORMULA(IF(LEN($A$2:$A)=0,"",IFERROR($E$2:$E/$L$2:$L,"")))}',
-    O: '={"ROAS"; ARRAYFORMULA(IF(LEN($A$2:$A)=0,"",IFERROR($N$2:$N/$E$2:$E,"")))}',
-    P: '={"Marketing Contribution"; ARRAYFORMULA(IF(LEN($A$2:$A)=0,"",N($N$2:$N)-N($E$2:$E)))}'
-  };
-  for (var col in f) {
-    if (f.hasOwnProperty(col)) sh.getRange(col + '1').setFormula(f[col]);
+  /* Първата версия слагаше ARRAYFORMULA в заглавния ред. Тя пълнеше
+     хиляда реда с празни низове и getLastRow() почваше да връща 1000.
+     Тук се чисти следата от нея, ако листът е строен по стария начин.
+     Изведените колони вече се пишат ред по ред от Marketing.gs. */
+  sh.getRange(1, 1, 1, sh.getMaxColumns()).clearContent();
+  bdsEnsureHeader_(sh, BDS_MARKETING_COLUMNS);
+  for (var i = 0; i < BDS_MD_FORMULA_COLS.length; i++) {
+    var col = BDS_MD_FORMULA_COLS[i] + 1;
+    sh.getRange(2, col, sh.getMaxRows() - 1, 1).clearContent();
   }
-  sh.getRange(1, 1, 1, BDS_MARKETING_COLUMNS.length)
-    .setFontWeight('bold').setBackground('#1f2937').setFontColor('#ffffff');
 
   var dataRows = Math.max(sh.getMaxRows() - 1, 1);
   sh.getRange(2, 1, dataRows, 1).setNumberFormat('dd.mm.yyyy');
@@ -494,6 +487,9 @@ function onOpen() {
       .addSeparator()
       .addItem('Провери всички заявки', 'recheckAllLeadHealth')
       .addItem('Построй/поправи таблицата', 'setupBdsOperations')
+      .addSeparator()
+      .addItem('Самопроверка на живо', 'runBdsSelfTest')
+      .addItem('Изчисти тестови редове', 'cleanupSelfTestRows')
       .addToUi();
   } catch (e) { /* без UI (тригер) */ }
 }

@@ -311,7 +311,7 @@
      Имейлът остава първичният път. CRM записът се прави ДОПЪЛНИТЕЛНО
      и НИКОГА не блокира потребителя: ако таблицата е недостъпна,
      човекът пак вижда „благодарим“, а заявката пак е в пощата. */
-  var CRM_ENDPOINT = '';
+  var CRM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzq8BTJekkoBC_zNbkZg4o3hmM-DwFMryDLaRxHiktX40M1Jnp2xp7UZhDsPUzdD8B9/exec';
 
   /** Записва заявката в CRM. Не връща нищо и не хвърля — по проект. */
   function sendToCrm(leadId, form, attribution) {

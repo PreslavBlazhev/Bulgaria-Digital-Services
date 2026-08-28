@@ -71,6 +71,16 @@ check('CAC без клиенти → празно', L.bdsCac(100, 0) === '');
 check('ROAS без разход → празно', L.bdsRoas(500, 0) === '');
 check('празно, не нула — нулата би излъгала, че е измерено',
   L.bdsCpl(100, 0) !== 0 && L.bdsCpl(100, 0) === '');
+
+/* Установено на живата таблица: заявка без внесен разход показваше
+   CPL = 0,00 €. Липсващ разход не значи безплатна заявка. */
+check('невнесен разход дава празен CPL, не 0', L.bdsCpl('', 1) === '');
+check('невнесен разход дава празен CPC, не 0', L.bdsCpc('', 40) === '');
+check('невнесен разход дава празен CAC, не 0', L.bdsCac('', 2) === '');
+check('невнесени показвания дават празен CTR', L.bdsCtr(40, '') === '');
+check('невнесен приход дава празен ROAS', L.bdsRoas('', 30) === '');
+check('разход без приход е ROAS 0 — измерен, лош резултат',
+  L.bdsRoas(0, 30) === 0);
 check('принос без разход е самият приход', L.bdsMarketingContribution(500, '') === 500);
 
 G('Числа от таблица');
@@ -158,14 +168,37 @@ check('празна дата не става ключ', L.bdsDateKey('') === '')
 G('Setup.gs строи каквото трябва');
 
 const setup = read('tools/crm/Setup.gs');
-check('изведените колони са ARRAYFORMULA в заглавния ред',
-  /H: '=\{"CTR"/.test(setup) && /P: '=\{"Marketing Contribution"/.test(setup));
-check('CTR формулата дели кликове на показвания', /\$G\$2:\$G\/\$F\$2:\$F/.test(setup));
-check('CPL формулата дели разход на заявки', /\$E\$2:\$E\/\$J\$2:\$J/.test(setup));
-check('CAC формулата дели разход на клиенти', /\$E\$2:\$E\/\$L\$2:\$L/.test(setup));
-check('ROAS формулата дели приход на разход', /\$N\$2:\$N\/\$E\$2:\$E/.test(setup));
-check('приносът вади разхода от прихода', /N\(\$N\$2:\$N\)-N\(\$E\$2:\$E\)/.test(setup));
-check('делението на нула е поето с IFERROR', (setup.match(/IFERROR/g) || []).length >= 5);
+const marketingGs = read('tools/crm/Marketing.gs');
+
+/* Формулите живеят на всеки ред, а не като ARRAYFORMULA в заглавния.
+   ARRAYFORMULA пълнеше листа с празни низове до дъното и
+   getLastRow() връщаше 1000 — установено на живата таблица. */
+G('Изведените показатели — формули на всеки ред');
+const f5 = L.bdsMarketingFormulas(5);
+check('CTR = кликове / показвания', f5.ctr.includes('$G5/$F5'), f5.ctr);
+check('CPC = разход / кликове', f5.cpc.includes('$E5/$G5'));
+check('CPL = разход / заявки', f5.cpl.includes('$E5/$J5'));
+check('CAC = разход / клиенти', f5.cac.includes('$E5/$L5'));
+check('ROAS = приход / разход', f5.roas.includes('$N5/$E5'));
+check('принос = приход − разход', f5.contribution.includes('N($N5)-N($E5)'));
+check('делението на нула е поето с IFERROR',
+  ['ctr', 'cpc', 'cpl', 'cac', 'roas'].every(k => f5[k].includes('IFERROR')));
+check('липсващ вход дава празно, не нула',
+  ['ctr', 'cpc', 'cpl', 'cac', 'roas'].every(k => /^=IF\(OR\(\$\w5="",\$\w5=""\),"",/.test(f5[k])),
+  f5.cpl);
+check('приносът се смята и когато едната страна липсва',
+  f5.contribution.startsWith('=IF(AND('));
+check('формулите се пишат от преизчисляването',
+  /bdsMarketingFormulas\(k \+ 2\)/.test(marketingGs) && /setFormulas\(/.test(marketingGs));
+/* Коментарът обяснява защо ARRAYFORMULA отпадна — проверката гледа
+   кода, не обяснението. */
+const setupCode = setup.replace(/\/\*[\s\S]*?\*\//g, '');
+check('Setup.gs вече не слага ARRAYFORMULA в заглавния ред',
+  !/ARRAYFORMULA/.test(setupCode) && !/setFormula\('=\{/.test(setupCode));
+check('Setup.gs чисти следата от старата ARRAYFORMULA',
+  /clearContent\(\)/.test(setup) && /BDS_MD_FORMULA_COLS/.test(setup));
+
+G('Setup.gs строи каквото трябва');
 check('нов лист се разширява до нужния брой колони преди запис',
   /insertColumnsAfter\(sheet\.getMaxColumns\(\)/.test(setup));
 check('Leads иска повече от 26-те колони по подразбиране',

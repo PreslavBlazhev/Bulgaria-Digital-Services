@@ -18,6 +18,7 @@
    без второ копие някъде другаде.
    ============================================================ */
 
+import vm from 'node:vm';
 import { loadLogic, reporter, read, exists } from './lib/ops-test-kit.mjs';
 
 const L = loadLogic();
@@ -26,6 +27,47 @@ const { G, check, blocked } = R;
 
 const LIVE = process.argv.includes('--live');
 const KEEP = process.argv.includes('--keep');
+
+/* ============================================================
+   0. Файловете изобщо се четат ли
+   ------------------------------------------------------------
+   Синтактична грешка в .gs файл се вижда чак когато човек го
+   постави в Apps Script и натисне Run. Тук се хваща по-рано.
+   ============================================================ */
+G('Apps Script проектът се зарежда');
+
+const GS_FILES = [
+  'tools/crm/Logic.gs',
+  'tools/crm/Code.gs',
+  'tools/crm/Marketing.gs',
+  'tools/crm/Sales.gs',
+  'tools/crm/Setup.gs',
+  'tools/crm/QaTest.gs',
+  'tools/ads/MetaImport.gs'
+];
+{
+  /* Азбучен ред — точно както Apps Script изпълнява файловете. */
+  const ordered = [...GS_FILES].sort((a, b) =>
+    a.split('/').pop().localeCompare(b.split('/').pop()));
+  const ctx = {
+    console, Date, JSON, Math, RegExp, String, Number,
+    isNaN, isFinite, parseFloat, parseInt, Utilities: {}, Logger: { log() {} }
+  };
+  vm.createContext(ctx);
+  for (const file of ordered) {
+    let err = '';
+    try { vm.runInContext(read(file), ctx, { filename: file }); } catch (e) { err = String(e); }
+    check(file + ' се изпълнява без грешка', err === '', err);
+  }
+  check('всички функции от менюто съществуват',
+    ['setupBdsOperations', 'rebuildMarketingFromCrm', 'recheckAllLeadHealth',
+      'assignProposalIdToSelection', 'runBdsSelfTest', 'cleanupSelfTestRows',
+      'doPost', 'doGet', 'onEdit', 'installDailyRebuild']
+      .every(fn => typeof ctx[fn] === 'function'),
+    Object.keys(ctx).filter(k => typeof ctx[k] === 'function').length + ' функции');
+  check('нищо на ниво файл не пипа Logic.gs преди зареждането му',
+    typeof ctx.BDS_LEAD_COLUMNS !== 'undefined' && ctx.BDS_LEAD_COLUMNS.length > 0);
+}
 
 /* ============================================================
    1. Схемата на CRM-а

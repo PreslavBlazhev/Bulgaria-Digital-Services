@@ -158,19 +158,30 @@ function bdsWriteMarketingRows_(sheet, rows) {
     sheet.getRange(2, I.clients + 1, n, 1).setValues(clientsCol);
     sheet.getRange(2, I.revenue + 1, n, 1).setValues(revenueCol);
     sheet.getRange(2, I.notes + 1, n, 1).setValues(notesCol);
+
+    /* Изведените колони се пишат наново на всеки ред. Затова изтрита
+       формула се връща сама на следващото преизчисляване, а листът не
+       се пълни с хиляда празни реда, както правеше ARRAYFORMULA. */
+    var ctr = [], cpc = [], cpl = [], cac = [], roas = [], contribution = [];
+    for (var k = 0; k < n; k++) {
+      var f = bdsMarketingFormulas(k + 2);
+      ctr.push([f.ctr]); cpc.push([f.cpc]); cpl.push([f.cpl]);
+      cac.push([f.cac]); roas.push([f.roas]); contribution.push([f.contribution]);
+    }
+    sheet.getRange(2, I.ctr + 1, n, 1).setFormulas(ctr);
+    sheet.getRange(2, I.cpc + 1, n, 1).setFormulas(cpc);
+    sheet.getRange(2, I.cpl + 1, n, 1).setFormulas(cpl);
+    sheet.getRange(2, I.cac + 1, n, 1).setFormulas(cac);
+    sheet.getRange(2, I.roas + 1, n, 1).setFormulas(roas);
+    sheet.getRange(2, I.contribution + 1, n, 1).setFormulas(contribution);
   }
 
-  /* Излишните стари редове се чистят колона по колона — формулите
-     в H, I, K, M, O, P не се пипат, те се празнят сами. */
+  /* Излишните стари редове се чистят изцяло — включително формулите,
+     иначе под последния истински ред остават празни показатели. */
   var lastRow = sheet.getLastRow();
   var extra = lastRow - 1 - n;
   if (extra > 0) {
-    var from = 2 + n;
-    sheet.getRange(from, 1, extra, 7).clearContent();
-    sheet.getRange(from, I.leads + 1, extra, 1).clearContent();
-    sheet.getRange(from, I.clients + 1, extra, 1).clearContent();
-    sheet.getRange(from, I.revenue + 1, extra, 1).clearContent();
-    sheet.getRange(from, I.notes + 1, extra, 1).clearContent();
+    sheet.getRange(2 + n, 1, extra, BDS_MARKETING_COLUMNS.length).clearContent();
   }
 }
 
