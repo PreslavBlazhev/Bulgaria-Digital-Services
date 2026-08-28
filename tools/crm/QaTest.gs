@@ -21,6 +21,19 @@
    ============================================================ */
 
 var QA_PREFIX = 'BDS-SELFTEST-';
+
+/* Всички префикси, които значат „тестов ред, трие се“.
+   BDS-QA- идва от tools/test-crm-integration.mjs --live.
+   Истинските заявки са BDS-ГГГГ-XXXXXX и не съвпадат с нито един. */
+var QA_PREFIXES = ['BDS-SELFTEST-', 'BDS-QA-'];
+
+function bdsIsQaLeadId_(id) {
+  var s = String(id || '').trim();
+  for (var i = 0; i < QA_PREFIXES.length; i++) {
+    if (s.indexOf(QA_PREFIXES[i]) === 0) return true;
+  }
+  return false;
+}
 var QA_CAMPAIGN = 'selftest_campaign';
 var QA_CAMPAIGN_ID = '999000111';
 var QA_DEAL_VALUE = 450;
@@ -356,7 +369,7 @@ function bdsQaCleanup_(ss, leadId) {
   if (last > 1) {
     var ids = leads.getRange(2, 1, last - 1, 1).getValues();
     for (var i = ids.length - 1; i >= 0; i--) {
-      if (String(ids[i][0]).indexOf(QA_PREFIX) === 0) { leads.deleteRow(i + 2); removed++; }
+      if (bdsIsQaLeadId_(ids[i][0])) { leads.deleteRow(i + 2); removed++; }
     }
   }
   var lastRaw = raw.getLastRow();
