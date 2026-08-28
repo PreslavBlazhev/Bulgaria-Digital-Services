@@ -21,30 +21,40 @@ function rebuildMarketingFromCrm() {
   var lock = LockService.getScriptLock();
   try { lock.waitLock(30000); } catch (e) { return 'Заето — пробвай пак.'; }
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var mdSheet = ss.getSheetByName(BDS_SHEETS.marketing);
-    if (!mdSheet) throw new Error('Няма лист ' + BDS_SHEETS.marketing + '. Пусни setupBdsOperations().');
-
-    var rawRows = bdsReadRawAds_(ss);
-    var adsAgg = bdsAggregateAds(rawRows);
-    var overrides = bdsReadCampaignOverrides_(ss);
-    var resolver = bdsCampaignIdResolver(adsAgg, overrides);
-
-    var leads = bdsReadLeadsForMarketing_(ss);
-    var crmAgg = bdsAggregateCrm(leads, resolver);
-
-    var existing = bdsReadMarketingRows_(mdSheet);
-    var rows = bdsRebuildMarketingRows(existing, crmAgg, adsAgg);
-
-    bdsWriteMarketingRows_(mdSheet, rows);
-
-    var msg = 'Marketing Daily: ' + rows.length + ' реда от ' +
-      leads.length + ' заявки и ' + rawRows.length + ' рекламни реда.';
-    Logger.log(msg);
-    return msg;
+    return bdsRebuildMarketingCore_();
   } finally {
     try { lock.releaseLock(); } catch (e) {}
   }
+}
+
+/** Същата работа, но БЕЗ да взима ключалката.
+
+    Викачите, които вече държат ключалката (doPost, bdsImportAdsRows),
+    минават оттук. Заключване върху заключване е излишно в най-добрия
+    случай и чакане само себе си в най-лошия — а такъв провал изглежда
+    като „заето, пробвай пак“ и се разследва часове. */
+function bdsRebuildMarketingCore_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var mdSheet = ss.getSheetByName(BDS_SHEETS.marketing);
+  if (!mdSheet) throw new Error('Няма лист ' + BDS_SHEETS.marketing + '. Пусни setupBdsOperations().');
+
+  var rawRows = bdsReadRawAds_(ss);
+  var adsAgg = bdsAggregateAds(rawRows);
+  var overrides = bdsReadCampaignOverrides_(ss);
+  var resolver = bdsCampaignIdResolver(adsAgg, overrides);
+
+  var leads = bdsReadLeadsForMarketing_(ss);
+  var crmAgg = bdsAggregateCrm(leads, resolver);
+
+  var existing = bdsReadMarketingRows_(mdSheet);
+  var rows = bdsRebuildMarketingRows(existing, crmAgg, adsAgg);
+
+  bdsWriteMarketingRows_(mdSheet, rows);
+
+  var msg = 'Marketing Daily: ' + rows.length + ' реда от ' +
+    leads.length + ' заявки и ' + rawRows.length + ' рекламни реда.';
+  Logger.log(msg);
+  return msg;
 }
 
 /* ------------------------------------------------------------
@@ -121,9 +131,13 @@ function bdsReadMarketingRows_(sheet) {
    Писане
 
    Изведените колони (CTR, CPC, CPL, CAC, ROAS, Marketing
-   Contribution) са ARRAYFORMULA в ЗАГЛАВНИЯ ред. Затова тук се
-   пишат само базовите колони — иначе формулата би била изтрита от
-   първия запис и никой не би разбрал защо показателите са спрели.
+   Contribution) се пишат като формула на всеки ред, тук.
+
+   Първата версия ги слагаше веднъж, като ARRAYFORMULA в заглавния
+   ред. На живата таблица се видя защо това не става: формулата се
+   разпростира до дъното на листа и оставя хиляда празни низа след
+   себе си. Празният низ е съдържание — getLastRow() почна да връща
+   1000 при един-единствен ред данни.
    ------------------------------------------------------------ */
 
 function bdsWriteMarketingRows_(sheet, rows) {
@@ -232,7 +246,8 @@ function bdsImportAdsRows(incoming) {
       sh.getRange(2 + rows.length, 1, extra, BDS_RAW_ADS_COLUMNS.length).clearContent();
     }
 
-    rebuildMarketingFromCrm();
+    /* Ключалката вече е взета по-горе — тук минаваме без нея. */
+    bdsRebuildMarketingCore_();
     return { ok: true, added: result.added, updated: result.updated, total: rows.length };
   } finally {
     try { lock.releaseLock(); } catch (e) {}

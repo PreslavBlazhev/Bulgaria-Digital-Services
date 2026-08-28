@@ -60,6 +60,7 @@ Lead ID (BDS-2026-XXXXXX)
 | `tools/crm/Setup.gs` | строи листовете, менютата, формулите и таблото |
 | `tools/crm/Sales.gs` | автоматиката при смяна на статус + номера на оферти |
 | `tools/crm/Marketing.gs` | преизчислява `Marketing Daily` от `Leads` и `Raw Ads` |
+| `tools/crm/QaTest.gs` | самопроверка на живо — минава цялото пътуване и се чисти |
 | `tools/ads/MetaImport.gs` | внос от Meta (чака рекламен акаунт) |
 
 ### Извън таблицата

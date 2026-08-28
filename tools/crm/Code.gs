@@ -131,7 +131,8 @@ function doPost(e) {
     /* Заявката влиза веднага в маркетинговите числа — иначе таблото
        щеше да я показва чак след първата ръчна редакция. */
     try {
-      rebuildMarketingFromCrm();
+      /* doPost вече държи ключалката — оттук минаваме без нея. */
+      bdsRebuildMarketingCore_();
     } catch (err2) {
       Logger.log('rebuild след нова заявка: ' + err2);
     }

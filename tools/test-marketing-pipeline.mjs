@@ -313,12 +313,16 @@ check('чете и Leads, и Raw Ads',
   /bdsReadLeadsForMarketing_/.test(marketing) && /bdsReadRawAds_/.test(marketing));
 check('заключва, за да не се засекат две пускания',
   /LockService/.test(marketing));
+check('викачите, които вече държат ключалката, минават без нея',
+  /function bdsRebuildMarketingCore_\(/.test(marketing) &&
+  /bdsRebuildMarketingCore_\(\);/.test(marketing) &&
+  /bdsRebuildMarketingCore_\(\);/.test(read('tools/crm/Code.gs')));
 check('не пише в колоните с формули',
   !/setValues\(\s*rows\s*\)/.test(marketing) && /I\.leads \+ 1/.test(marketing));
 check('вносът на реклама минава през UPSERT',
   /bdsUpsertRawAds\(/.test(marketing));
 check('след внос се преизчислява маркетингът',
-  /rebuildMarketingFromCrm\(\);/.test(marketing));
+  /bdsImportAdsRows[\s\S]*?bdsRebuildMarketingCore_\(\);/.test(marketing));
 
 check('Won слага Client = Да', /v\[iClient\] = 'Да'/.test(sales));
 check('Won слага Won\/Lost = Won', /v\[iWonLost\] = 'Won'/.test(sales));
