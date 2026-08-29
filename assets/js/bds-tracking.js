@@ -77,7 +77,20 @@
     wait_for_update: 500
   });
 
-  var loaded = false;
+  /* Двата свята се зареждат ПООТДЕЛНО и всеки помни себе си.
+
+     Първата версия имаше един общ флаг `loaded` и една функция
+     `loadTags()`, викана при „анализ ИЛИ реклама“. Две последствия,
+     и двете грешни:
+
+       · съгласие само за анализ зареждаше и рекламния Pixel;
+       · съгласие за реклама, дадено ПО-КЪСНО, не зареждаше нищо —
+         общият флаг вече беше вдигнат и функцията излизаше веднага.
+
+     Затова: отделен флаг за Google и отделен за Meta, и всяка
+     функция може да се вика повторно без да дублира нищо. */
+  var googleLoaded = false;
+  var metaLoaded = false;
 
   function loadScript(src) {
     var s = document.createElement('script');
@@ -87,50 +100,54 @@
     return s;
   }
 
-  /** Зарежда таговете. Извиква се само след съгласие. */
-  function loadTags() {
-    if (loaded) return;
-    var any = false;
+  /** GA4 / Google Ads / GTM. Иска съгласие за анализ ИЛИ за реклама. */
+  function loadGoogleTags() {
+    if (googleLoaded) return;
 
     if (CONFIG.gtmId) {
       /* GTM се зарежда сам и оттам нататък управлява GA4, Ads и Meta. */
       loadScript('https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(CONFIG.gtmId));
       global.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
-      any = true;
+      googleLoaded = true;
     } else if (CONFIG.ga4Id || CONFIG.adsConversionId) {
-      /* Без GTM: директен gtag за GA4 и/или Google Ads. */
       var first = CONFIG.ga4Id || CONFIG.adsConversionId;
       loadScript('https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(first));
       gtag('js', new Date());
       if (CONFIG.ga4Id) gtag('config', CONFIG.ga4Id);
       if (CONFIG.adsConversionId) gtag('config', CONFIG.adsConversionId);
       global.gtag = global.gtag || gtag;
-      any = true;
+      googleLoaded = true;
     }
+  }
 
-    if (CONFIG.metaPixelId && !CONFIG.gtmId) {
-      /* Ако Meta минава през GTM, не се зарежда втори път оттук. */
-      /* eslint-disable */
-      !function (f, b, e, v, n, t, s) {
-        if (f.fbq) return; n = f.fbq = function () {
-          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-        };
-        if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
-        t = b.createElement(e); t.async = !0; t.src = v;
-        s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-      }(global, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-      /* eslint-enable */
-      global.fbq('init', CONFIG.metaPixelId);
-      global.fbq('track', 'PageView');
-      any = true;
-    }
+  /** Meta Pixel. Иска съгласие за РЕКЛАМА — анализът не го отключва.
+      Празен Pixel ID значи, че нищо не се зарежда и нищо не гърми. */
+  function loadMetaPixel() {
+    if (metaLoaded) return;
+    if (!CONFIG.metaPixelId) return;
+    /* Ако Meta минава през GTM, не се зарежда втори път оттук. */
+    if (CONFIG.gtmId) return;
 
-    loaded = any;
-    if (CONFIG.debug) console.info('[BDS tracking] тагове заредени:', any ? 'да' : 'няма конфигурирани ID-та');
+    /* eslint-disable */
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+      t = b.createElement(e); t.async = !0; t.src = v;
+      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    }(global, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    /* eslint-enable */
+    global.fbq('init', CONFIG.metaPixelId);
+    /* PageView тръгва ЧАК тук — след съгласието, не при зареждане. */
+    global.fbq('track', 'PageView');
+    metaLoaded = true;
+    if (CONFIG.debug) console.info('[BDS tracking] Meta Pixel зареден');
   }
 
   /**
-   * Извиква се от банера за съгласие.
+   * Извиква се от банера за съгласие. Може да се вика многократно —
+   * при смяна на избора се зарежда само това, което още го няма.
    * @param {{analytics?:boolean, ads?:boolean}} choice
    */
   function grantConsent(choice) {
@@ -140,8 +157,29 @@
     consentState.ad_user_data = choice.ads ? 'granted' : 'denied';
     consentState.ad_personalization = choice.ads ? 'granted' : 'denied';
     gtag('consent', 'update', consentState);
-    if (choice.analytics || choice.ads) loadTags();
+
+    if (choice.analytics || choice.ads) loadGoogleTags();
+    if (choice.ads) loadMetaPixel();
+
     if (CONFIG.debug) console.info('[BDS tracking] съгласие:', consentState);
+  }
+
+  function adsAllowed() {
+    return consentState.ad_storage === 'granted';
+  }
+
+  /** Единственият път към fbq. Мълчи, ако рекламата не е разрешена
+      или Pixel-ът не е зареден — така извикването е безопасно
+      навсякъде и не иска проверки на всяко място. */
+  function meta(kind, name, params, options) {
+    if (!adsAllowed()) return false;
+    if (typeof global.fbq !== 'function') return false;
+    try {
+      global.fbq(kind, name, scrub(params) || {}, options || undefined);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function isConfigured() {
@@ -154,7 +192,10 @@
     grantConsent: grantConsent,
     consentState: function () { return JSON.parse(JSON.stringify(consentState)); },
     isConfigured: isConfigured,
-    isLoaded: function () { return loaded; },
+    isLoaded: function () { return googleLoaded || metaLoaded; },
+    isMetaLoaded: function () { return metaLoaded; },
+    adsAllowed: adsAllowed,
+    meta: meta,
     gtag: gtag
   };
 })(window);

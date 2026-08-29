@@ -28,7 +28,8 @@ const SUITES = [
   { name: 'Маркетингов тракер (Phase 18)', file: 'tools/test-marketing-tracker.mjs', args: [] },
   { name: 'Затворен кръг (Phase 20)', file: 'tools/test-marketing-pipeline.mjs', args: [] },
   { name: 'Офертен процес (Phase 17)', file: 'tools/test-proposal-workflow.mjs', args: [] },
-  { name: 'Внос на реклами (Phase 19)', file: 'tools/test-ads-import.mjs', args: [] }
+  { name: 'Внос на реклами (Phase 19)', file: 'tools/test-ads-import.mjs', args: [] },
+  { name: 'Meta retargeting (Phase 21)', file: 'tools/test-meta-retargeting.mjs', args: [] }
 ];
 
 /* Проверките срещу живата таблица искат служебен ключ. Без него

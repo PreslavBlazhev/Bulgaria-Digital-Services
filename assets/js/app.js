@@ -968,15 +968,28 @@
 
       if (T && T.isLoaded()) {
         if (typeof window.gtag === 'function') window.gtag('event', event, payload);
-        if (typeof window.fbq === 'function') {
+
+        /* Meta минава през BDSTracking.meta(), не през fbq директно.
+           Там стои проверката за рекламно съгласие — иначе всяко ново
+           място, което праща събитие, трябва да я помни само.
+
+           Параметрите са НАРОЧНО празни: Meta получава факта, че
+           нещо се е случило, и нищо повече. Аудиториите се строят от
+           името на събитието, не от съдържанието му. */
+        if (T.meta) {
           if (event === 'generate_lead') {
             /* eventID позволява по-късна дедупликация със сървърния CAPI. */
-            window.fbq('track', 'Lead', {}, { eventID: params.lead_event_id });
+            T.meta('track', 'Lead', {}, { eventID: params.lead_event_id });
           } else if (event === 'restaurant_form_start') {
             /* Без това Meta не може да изгради аудитория „започнали
                формата, но не изпратили“ — тя е най-ценната за
-               retargeting. Няма параметри, за да не тръгват лични данни. */
-            window.fbq('trackCustom', 'RestaurantFormStart');
+               retargeting. */
+            T.meta('trackCustom', 'RestaurantFormStart');
+          } else if (event === 'restaurant_page_view') {
+            /* Отделно от PageView: то се праща на всяка страница, а
+               това — само на /restaurants. Аудиторията „посетители на
+               ресторантската страница“ стъпва на него. */
+            T.meta('trackCustom', 'RestaurantLandingView');
           }
         }
       }
@@ -1056,11 +1069,23 @@
     var rform = document.getElementById('restaurantForm');
     if (rform) {
       var started = false;
-      rform.addEventListener('focusin', function () {
+      /* „Започнал формата“ значи ЧОВЕК я е докоснал.
+
+         isTrusted отсява фокуса, сложен от код: при грешка във
+         валидацията сами извикваме .focus() върху първото сгрешено
+         поле, а autofocus и възстановяването на фокуса при връщане
+         назад също раждат focusin. Всяко от тях би надуло
+         аудиторията „започнали, но не изпратили“ с хора, които не са
+         пипали нищо. */
+      var markStarted = function (e) {
         if (started) return;
+        if (e && e.isTrusted === false) return;
         started = true;                       /* веднъж на зареждане */
         track('restaurant_form_start', {});
-      });
+      };
+      rform.addEventListener('focusin', markStarted);
+      /* Ако браузърът попълни автоматично, фокус може и да няма. */
+      rform.addEventListener('input', markStarted);
     }
   })();
 
