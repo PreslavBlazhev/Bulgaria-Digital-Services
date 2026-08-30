@@ -116,6 +116,18 @@ G('Привързване');
 }
 
 {
+  /* Google подава utm_campaign={campaignid} — числото, не името.
+     То трябва да се лепне за същия ред, иначе заявката увисва без
+     разход срещу нея. */
+  const rows = rebuild([],
+    [lead({ leadId: 'A', campaign: '22112233' })],
+    [adRow({ spend: 12, impressions: 900, clicks: 40 })]);
+  check('числов {campaignid} се разпознава директно',
+    rows.length === 1 && rows[0][I.campaignId] === '22112233' && rows[0][I.leads] === 1,
+    rows.length + ' реда');
+}
+
+{
   const rows = rebuild([],
     [lead({ leadId: 'A', campaign: 'непозната_кампания' })],
     [adRow({ spend: 10, impressions: 500, clicks: 20 })]);

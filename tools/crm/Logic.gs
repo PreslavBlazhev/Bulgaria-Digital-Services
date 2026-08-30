@@ -471,11 +471,13 @@ function bdsAggregateAds(rawRows) {
     overrides позволява ръчно съответствие в лист Config. */
 function bdsCampaignIdResolver(adsAgg, overrides) {
   var byName = {};
+  var knownIds = {};
   for (var k in adsAgg) {
     if (!adsAgg.hasOwnProperty(k)) continue;
     var a = adsAgg[k];
-    if (!a.campaign || !a.campaignId) continue;
-    byName[a.channel + '|' + a.campaign.toLowerCase()] = a.campaignId;
+    if (!a.campaignId) continue;
+    knownIds[String(a.campaignId).trim()] = a.campaignId;
+    if (a.campaign) byName[a.channel + '|' + a.campaign.toLowerCase()] = a.campaignId;
   }
   var ov = {};
   for (var name in (overrides || {})) {
@@ -485,6 +487,15 @@ function bdsCampaignIdResolver(adsAgg, overrides) {
     var n = String(campaignName || '').trim().toLowerCase();
     if (!n) return '';
     if (ov[n]) return ov[n];
+
+    /* Google подава `utm_campaign={campaignid}` — числото, не името.
+       Числото е по-добрият избор за проследяване, защото преживява
+       преименуване на кампанията. Затова тук се приема директно:
+       ако вече сме виждали такъв Campaign ID в рекламните данни, то
+       заявката принадлежи точно на него. Без това правило заявката
+       увисва на отделен ред, без разход срещу нея. */
+    if (knownIds.hasOwnProperty(n)) return knownIds[n];
+
     var hit = byName[channel + '|' + n];
     return hit || '';
   };
