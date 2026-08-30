@@ -188,4 +188,50 @@ check('телефонът е един и същи навсякъде',
   read('assets/js/app.js').includes('tel:+359877364001'));
 check('телефонът в данните съвпада', data.includes('+359877364001'));
 
+/* ============================================================
+   5. Живата продукция — само при --production
+   ------------------------------------------------------------
+   Локално вярно ≠ качено. Домейнът може да сервира предишния
+   деплой и всичко по-горе да минава, докато посетителят вижда
+   стария адрес.
+   ============================================================ */
+if (process.argv.includes('--production')) {
+  G('Жива продукция');
+  const pages = [
+    ['/', SITE + '/'],
+    ['/restaurants', SITE + '/restaurants']
+  ];
+  for (const [label, url] of pages) {
+    let html = '', status = 0;
+    try {
+      const res = await fetch(url, { redirect: 'follow' });
+      status = res.status;
+      html = await res.text();
+    } catch (e) {
+      check(label + ' отговаря', false, String(e.cause?.code || e.message));
+      continue;
+    }
+    check(label + ' отговаря с 200', status === 200, String(status));
+    if (!html) continue;
+    check(label + ' — без отменен имейл', !RETIRED_EMAILS.some(e => html.includes(e)));
+    check(label + ' — без отменен домейн', !html.includes(RETIRED_HOST));
+    check(label + ' — носи служебния имейл', html.includes(EMAIL));
+    const canon = /<link rel="canonical" href="([^"]+)"/.exec(html);
+    if (canon) {
+      check(label + ' — canonical е на домейна', canon[1].startsWith(SITE), canon[1]);
+    }
+  }
+  try {
+    const robots = await (await fetch(SITE + '/robots.txt')).text();
+    check('robots в продукция сочи домейна',
+      robots.includes(SITE + '/sitemap.xml') && !robots.includes(RETIRED_HOST),
+      (robots.match(/Sitemap:.*/) || [''])[0]);
+  } catch (e) {
+    check('robots.txt се чете', false, String(e.message));
+  }
+  console.log('\n\x1b[2m  Провал тук при зелено по-горе значи едно: качено е старо.\x1b[0m');
+} else {
+  console.log('\n\x1b[2m  Живата продукция не е проверявана: --production\x1b[0m');
+}
+
 process.exit(R.summary() ? 0 : 1);
