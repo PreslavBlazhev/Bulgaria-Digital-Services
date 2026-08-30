@@ -1,7 +1,7 @@
 # Google Ads — Search кампания за ресторанти
 
 **Статус:** спецификация. Нищо не е публикувано, няма създаден акаунт, няма похарчен бюджет.
-**Landing page:** `https://bulgaria-digital-services.netlify.app/restaurants`
+**Landing page:** `https://bulgaria-digital-services.com/restaurants`
 **Изготвено:** 27.08.2026
 
 > **Важно за keyword-ите по-долу.** Нямам достъп до Keyword Planner, затова
@@ -292,7 +292,7 @@ bidding-ът е минал на Maximize Conversions. Тогава call asset с
 
 ## 7. Final URL и tracking
 
-**Final URL:** `https://bulgaria-digital-services.netlify.app/restaurants`
+**Final URL:** `https://bulgaria-digital-services.com/restaurants`
 
 Никога към началната страница.
 
@@ -407,7 +407,7 @@ thank-you страницата.
 | 7 | Смяна на домейна, ако мине на `bds.bg` | не |
 
 > **Точка 6 е най-подценяваният блокер.** В момента
-> `bulgaria-digital-services.netlify.app` връща стария сайт. Рекламата ще
+> `bulgaria-digital-services.com` връща стария сайт. Рекламата ще
 > праща платен трафик към страница, която още не съществува онлайн.
 
 ---

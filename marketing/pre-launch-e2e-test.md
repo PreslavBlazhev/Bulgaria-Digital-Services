@@ -265,7 +265,7 @@ function refHost(referrer) {
 
 | | |
 |---|---|
-| Endpoint | `https://formsubmit.co/ajax/pr2.blazhev@gmail.com` |
+| Endpoint | `https://formsubmit.co/ajax/info@bulgaria-digital-services.com` |
 | Формат | плосък JSON — FormSubmit показва вложените обекти нечетимо |
 | Полета | контакт, бизнес, услуга, бюджет + attribution + първо докосване |
 | Статус | **`BLOCKED — ИЗИСКВА ЕДИН КОНТРОЛИРАН ТЕСТ СЛЕД DEPLOY`** |
@@ -351,7 +351,7 @@ FormSubmit изисква еднократно потвърждение по и�
 
 Съобщението при грешка дава и резервен път:
 „Не успяхме да изпратим запитването. Опитайте отново или ни пишете на
-pr2.blazhev@gmail.com“.
+info@bulgaria-digital-services.com“.
 
 ---
 

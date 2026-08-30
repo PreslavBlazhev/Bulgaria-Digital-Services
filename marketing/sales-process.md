@@ -35,7 +35,7 @@ CRM-ът е Google таблица **BDS Operations**, лист `Leads`. Инст
 
 | | |
 |---|---|
-| Имейл | `pr2.blazhev@gmail.com` |
+| Имейл | `info@bulgaria-digital-services.com` |
 | Телефон | `+359 877 364 001` |
 | Роля | Приема заявката, води разговора, изготвя офертата, затваря |
 

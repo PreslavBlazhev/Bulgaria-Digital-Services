@@ -74,7 +74,7 @@
     currency: '€',
     contact: {
       name: 'Преслав Блажев',
-      email: 'pr2.blazhev@gmail.com',
+      email: 'info@bulgaria-digital-services.com',
       phone: '0877 364 001',
       phoneHref: '+359877364001'
     }

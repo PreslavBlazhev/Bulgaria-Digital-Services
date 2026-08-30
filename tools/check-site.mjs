@@ -99,7 +99,7 @@ function scannableSentences(html) {
 }
 
 /* Официални контакти. Всяко отклонение проваля проверката. */
-const OFFICIAL_EMAIL = 'pr2.blazhev@gmail.com';
+const OFFICIAL_EMAIL = 'info@bulgaria-digital-services.com';
 const RETIRED_EMAILS = [/pr4\.blazhev@gmail\.com/i];
 const OFFICIAL_PHONE = /0877\s?364\s?001|\+359\s?877\s?364\s?001/;
 

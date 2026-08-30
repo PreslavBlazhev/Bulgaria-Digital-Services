@@ -86,7 +86,7 @@
     return '' +
       '<footer class="footer footer--landing"><div class="container footer__bottom">' +
         '<span>© <span id="year"></span> Bulgaria Digital Services · ' +
-          '<a href="mailto:pr2.blazhev@gmail.com">pr2.blazhev@gmail.com</a> · ' +
+          '<a href="mailto:info@bulgaria-digital-services.com">info@bulgaria-digital-services.com</a> · ' +
           '<a href="tel:+359877364001">0877 364 001</a></span>' +
         '<div class="footer__legal">' +
           '<a href="index.html">Основен сайт</a>' +
@@ -117,7 +117,7 @@
           '<a href="projects.html">Case studies</a></div>' +
         '<div class="footer__col reveal" data-delay="4"><h4>Контакти</h4>' +
           '<span>Преслав Блажев</span>' +
-          '<a href="mailto:pr2.blazhev@gmail.com">pr2.blazhev@gmail.com</a><a href="tel:+359877364001">0877 364 001</a>' +
+          '<a href="mailto:info@bulgaria-digital-services.com">info@bulgaria-digital-services.com</a><a href="tel:+359877364001">0877 364 001</a>' +
           '<span>с. Къшин, общ. Плевен<br>ул. „Кирил и Методий“ 8</span>' +
           '<span>Отговаряме 24/7 · България</span><a href="contact.html">Запитване</a></div>' +
       '</div>' +
@@ -299,9 +299,9 @@
   /* ---------- Contact form (lead generation) ---------- */
   // Изпраща запитването директно на имейла чрез FormSubmit (без backend).
   // ВАЖНО: при ПЪРВОТО изпращане FormSubmit праща имейл за потвърждение на
-  // pr2.blazhev@gmail.com — трябва да се кликне линкът в него ЕДНОКРАТНО, за да се активира.
+  // info@bulgaria-digital-services.com — трябва да се кликне линкът в него ЕДНОКРАТНО, за да се активира.
   // За смяна на получателя — смени имейла в LEAD_ENDPOINT.
-  var LEAD_ENDPOINT = 'https://formsubmit.co/ajax/pr2.blazhev@gmail.com';
+  var LEAD_ENDPOINT = 'https://formsubmit.co/ajax/info@bulgaria-digital-services.com';
 
   /* ---------- CRM ----------
      Адресът на Google Apps Script Web App-а, който записва заявката в
@@ -442,11 +442,11 @@
           showNote('Благодарим! Запитването е изпратено — ще се свържем с вас скоро.', 'success');
           form.reset();
         } else {
-          showNote('Възникна проблем при изпращането. Пишете ни на pr2.blazhev@gmail.com', 'error');
+          showNote('Възникна проблем при изпращането. Пишете ни на info@bulgaria-digital-services.com', 'error');
         }
       }).catch(function () {
         if (submitBtn) submitBtn.classList.remove('is-loading');
-        showNote('Няма връзка в момента. Пишете ни на pr2.blazhev@gmail.com', 'error');
+        showNote('Няма връзка в момента. Пишете ни на info@bulgaria-digital-services.com', 'error');
       });
     });
   }
@@ -918,7 +918,7 @@
           }
           /* Попълненото остава на място — само съобщението се сменя. */
           showNote(
-            'Не успяхме да изпратим запитването. Опитайте отново или ни пишете на pr2.blazhev@gmail.com, или се обадете на 0877 364 001.',
+            'Не успяхме да изпратим запитването. Опитайте отново или ни пишете на info@bulgaria-digital-services.com, или се обадете на 0877 364 001.',
             'error'
           );
         });

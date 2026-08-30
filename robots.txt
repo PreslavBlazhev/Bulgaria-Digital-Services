@@ -8,4 +8,4 @@ Disallow: /print/
 # Не се линкват отникъде и не са в sitemap.xml.
 Disallow: /case-faderoom-infinity.html
 
-Sitemap: https://bulgaria-digital-services.netlify.app/sitemap.xml
+Sitemap: https://bulgaria-digital-services.com/sitemap.xml

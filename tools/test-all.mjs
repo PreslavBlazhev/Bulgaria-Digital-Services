@@ -23,11 +23,13 @@ const LIVE = args.includes('--live');
 
 const SUITES = [
   { name: 'Сайт — съдържание и данни', file: 'tools/check-site.mjs', args: [] },
+  { name: 'Публична идентичност', file: 'tools/test-identity.mjs', args: [] },
   { name: 'Ресторантска фуния', file: 'tools/test-restaurant-funnel.mjs', args: BROWSER ? ['--browser'] : [] },
   { name: 'CRM интеграция (Phase 16)', file: 'tools/test-crm-integration.mjs', args: LIVE ? ['--live'] : [] },
   { name: 'Маркетингов тракер (Phase 18)', file: 'tools/test-marketing-tracker.mjs', args: [] },
   { name: 'Затворен кръг (Phase 20)', file: 'tools/test-marketing-pipeline.mjs', args: [] },
   { name: 'Офертен процес (Phase 17)', file: 'tools/test-proposal-workflow.mjs', args: [] },
+  { name: 'Google Ads структура (Phase 12·13)', file: 'tools/test-google-ads.mjs', args: [] },
   { name: 'Внос на реклами (Phase 19)', file: 'tools/test-ads-import.mjs', args: [] },
   { name: 'Meta retargeting (Phase 21)', file: 'tools/test-meta-retargeting.mjs', args: [] },
   { name: 'Социално съдържание (Phase 22)', file: 'tools/test-social-content.mjs', args: [] }

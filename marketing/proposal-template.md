@@ -12,8 +12,8 @@
 # ОФЕРТА
 
 **Bulgaria Digital Services**
-Преслав Блажев · `pr2.blazhev@gmail.com` · +359 877 364 001
-`bulgaria-digital-services.netlify.app`
+Преслав Блажев · `info@bulgaria-digital-services.com` · +359 877 364 001
+`bulgaria-digital-services.com`
 
 | | |
 |---|---|
@@ -245,7 +245,7 @@
 
 ---
 
-*Bulgaria Digital Services · Преслав Блажев · `pr2.blazhev@gmail.com` · +359 877 364 001*
+*Bulgaria Digital Services · Преслав Блажев · `info@bulgaria-digital-services.com` · +359 877 364 001*
 
 ---
 ---

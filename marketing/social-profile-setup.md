@@ -73,7 +73,7 @@ highlights, проверка преди реклама.
 | 3 | Потребителско име | по избор при създаване | — |
 | 4 | Bio | текстът по-долу | готов |
 | 5 | Връзка към сайта | виж по-долу | — |
-| 6 | Имейл | `pr2.blazhev@gmail.com` | реален |
+| 6 | Имейл | `info@bulgaria-digital-services.com` | реален |
 | 7 | Телефон | `+359 877 364 001` | реален |
 | 8 | Категория | Web Designer / Software Company | — |
 | 9 | Локация | Плевен, България | реална |
@@ -131,7 +131,7 @@ Bulgaria Digital Services изгражда сайтове и дигитални 
 собствена система за онлайн поръчки.
 
 Плевен, България
-pr2.blazhev@gmail.com · +359 877 364 001
+info@bulgaria-digital-services.com · +359 877 364 001
 ```
 
 **Всяко твърдение съществува на `/restaurants`.** Няма измислени резултати,
@@ -143,8 +143,11 @@ pr2.blazhev@gmail.com · +359 877 364 001
 
 | Профил | Препоръка |
 |---|---|
-| Instagram | `bulgaria-digital-services.netlify.app/restaurants` |
+| Instagram | `https://bulgaria-digital-services.com/restaurants` |
 | Facebook | същото |
+
+> Адресът в Netlify остава само като произход на деплоя. Пред клиент,
+> в профил или в реклама се показва единствено собственият домейн.
 
 **Защо ресторантската страница, а не началната:** докато ресторантите са
 фокусът, посетителят от профила трябва да попадне директно на офертата за него.
@@ -258,7 +261,7 @@ pr2.blazhev@gmail.com · +359 877 364 001
 | „За нас“ | текстът по-горе |
 | Уебсайт | `…/restaurants?utm_source=facebook&utm_medium=social&utm_campaign=profile_about` |
 | Телефон | `+359 877 364 001` |
-| Имейл | `pr2.blazhev@gmail.com` |
+| Имейл | `info@bulgaria-digital-services.com` |
 | Локация | Плевен, България — **град, без адрес** |
 | Бутон за действие | **„Изпратете съобщение“** |
 | Профилна снимка | `assets/img/bds-favicon.png` |
