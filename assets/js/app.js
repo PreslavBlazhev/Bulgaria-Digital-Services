@@ -105,7 +105,7 @@
       '<footer class="footer"><div class="container footer__grid">' +
         '<div class="footer__brand reveal" data-delay="1"><a href="index.html" class="brand">' + LOGO + '</a>' +
           '<p>Изграждаме дигитално присъствие, което помага на бизнеса да изглежда по-професионално и да получава повече клиенти.</p>' +
-          '<div class="footer__social"><a href="https://instagram.com/_.preslav._b" target="_blank" rel="noopener" aria-label="Instagram">IG</a></div>' +
+          '<div class="footer__social"><a href="https://www.instagram.com/bulgaria_digital_services/" target="_blank" rel="noopener" aria-label="Instagram">IG</a></div>' +
         '</div>' +
         '<div class="footer__col reveal" data-delay="2"><h4>Навигация</h4>' +
           '<a href="index.html">Начало</a><a href="services.html">Услуги</a><a href="projects.html">Проекти</a><a href="process.html">Процес</a><a href="about.html">За нас</a></div>' +
