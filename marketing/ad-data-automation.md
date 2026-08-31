@@ -43,7 +43,7 @@ Google Ads Scripts вместо API-то.
 
 | Свойство | Пример | Тайна? |
 |---|---|---|
-| `META_AD_ACCOUNT_ID` | `act_1234567890` | не |
+| `META_AD_ACCOUNT_ID` | `act_1516967893518549` — акаунт **BDS Ads** | не |
 | `META_ACCESS_TOKEN` | дълготраен токен | **да** |
 
 После `metaConnectionTest()`, и при успех `installMetaTrigger()`.

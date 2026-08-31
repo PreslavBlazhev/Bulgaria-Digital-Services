@@ -651,9 +651,24 @@ async function browserTests(base) {
     check('приемане: ads става granted', st.ad_storage === 'granted', st.ad_storage);
     check('приемане: ad_user_data и ad_personalization също',
       st.ad_user_data === 'granted' && st.ad_personalization === 'granted');
-    /* ID-тата са празни, значи дори при съгласие няма какво да се зареди. */
-    check('с празни ID-та пак нула външни заявки (нищо за зареждане)',
-      external.length === 0, external.join(' | '));
+    /* Meta Pixel-ът вече е конфигуриран. Затова при дадено рекламно
+       съгласие ТРЯБВА да се зареди — това е доказателството, че
+       съгласието наистина отключва пиксела, а не че кодът мълчи,
+       защото няма ID.
+
+       Google остава без ID и не се зарежда. Двете се проверяват
+       поотделно, за да не се крият едно зад друго. */
+    const meta = external.filter(u => /connect\.facebook/.test(u));
+    const google = external.filter(u => /googletagmanager|google-analytics|doubleclick|googleadservices/.test(u));
+
+    check('след съгласие Meta Pixel се зарежда', meta.length > 0,
+      meta.length + ' заявки');
+    check('зарежда се точно конфигурираният пиксел',
+      meta.some(u => u.includes('1666581461701404')) ||
+      meta.some(u => /fbevents\.js/.test(u)),
+      meta[0] || '');
+    check('Google остава незареден — няма попълнено ID',
+      google.length === 0, google.join(' | '));
     check('нула конзолни грешки в целия поток', errs().length === 0, errs().join(' | '));
   });
 

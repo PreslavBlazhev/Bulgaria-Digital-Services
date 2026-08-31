@@ -189,6 +189,70 @@ check('телефонът е един и същи навсякъде',
 check('телефонът в данните съвпада', data.includes('+359877364001'));
 
 /* ============================================================
+   4б. Рекламни акаунти и класификация на трафика
+   ------------------------------------------------------------
+   ID-тата тук НЕ са тайни: Pixel ID се вижда в кода на всеки сайт с
+   пиксел, а Ad Account и Customer ID са идентификатори, не достъп.
+   Тайните — access token, developer token, OAuth — не влизат в
+   проекта и това също се проверява.
+   ============================================================ */
+G('Рекламни акаунти');
+
+const META_PIXEL = '1666581461701404';
+const META_ACCOUNT = '1516967893518549';
+const GOOGLE_CUSTOMER = '337-991-6058';
+
+const trackingSrc = read('assets/js/bds-tracking.js');
+check('Meta Pixel ID е в централната конфигурация',
+  new RegExp("metaPixelId:\\s*'" + META_PIXEL + "'").test(trackingSrc));
+check('Pixel ID не е разпръснат из страниците',
+  !read('index.html').includes(META_PIXEL) && !read('restaurants.html').includes(META_PIXEL));
+check('Meta base code не е копиран в HTML',
+  !read('index.html').includes('connect.facebook.net') &&
+  !read('restaurants.html').includes('connect.facebook.net'));
+
+check('Meta Ad Account ID е записан там, където трябва',
+  read('marketing/meta-retargeting-live-setup.md').includes(META_ACCOUNT) &&
+  read('tools/ads/MetaImport.gs').includes(META_ACCOUNT));
+check('Google Ads Customer ID е записан за ориентир',
+  read('tools/ads/google-ads-script.js').includes(GOOGLE_CUSTOMER));
+
+/* Тайните остават извън проекта. */
+const secretHunt = ['tools/ads/MetaImport.gs', 'tools/ads/google-ads-script.js',
+  'assets/js/bds-tracking.js', 'assets/js/app.js'];
+for (const file of secretHunt) {
+  const src = read(file).replace(/\/\*[\s\S]*?\*\//g, '');
+  check(file + ' — без access token', !/EAA[A-Za-z0-9]{20,}/.test(src));
+  check(file + ' — без developer token', !/developer[_-]?token\s*[:=]\s*['\"]\S/i.test(src));
+}
+check('токенът на Meta се чете от Script Properties',
+  /getProperty\('META_ACCESS_TOKEN'\)/.test(read('tools/ads/MetaImport.gs')));
+
+G('Класификация на трафика');
+const appSrc = read('assets/js/app.js');
+check('социалният трафик има своя категория',
+  /instagram: 'Instagram'/.test(appSrc) && /facebook: 'Facebook'/.test(appSrc));
+check('платеният социален се отделя от органичния',
+  /PAID_SOCIAL/.test(appSrc) && /meta_ads/.test(appSrc));
+check('cpc се разпознава като платено търсене',
+  /PAID_SEARCH\s*=\s*\/\^\([^)]*cpc/.test(appSrc));
+check('числов Campaign ID се разрешава',
+  /knownIds\.hasOwnProperty\(n\)/.test(read('tools/crm/Logic.gs')));
+
+G('Профили и препоръчани връзки');
+const social = read('marketing/social-live-checklist.md');
+check('чеклистът за профилите съществува', social.length > 500);
+check('Instagram профилът е записан', social.includes('@bulgaria_digital_services'));
+check('препоръчаните UTM връзки са на производствения домейн',
+  social.includes(SITE + '/?utm_source=instagram') &&
+  social.includes(SITE + '/?utm_source=facebook'));
+check('не се твърди, че има публикации',
+  /не е проверявано оттук и не се твърди/i.test(social));
+check('сайтът линква фирмения Instagram, не личния',
+  appSrc.includes('instagram.com/bulgaria_digital_services') &&
+  !appSrc.includes('_.preslav._b'));
+
+/* ============================================================
    5. Живата продукция — само при --production
    ------------------------------------------------------------
    Локално вярно ≠ качено. Домейнът може да сервира предишния

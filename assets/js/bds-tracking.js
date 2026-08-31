@@ -26,7 +26,14 @@
     ga4Id: '',              /* G-XXXXXXXXXX */
     adsConversionId: '',    /* AW-XXXXXXXXX */
     adsLeadLabel: '',       /* етикетът на lead конверсията */
-    metaPixelId: '',        /* цифров Pixel ID */
+
+    /* Meta Dataset „BDS Website“. Pixel ID НЕ е тайна — той е видим в
+       кода на всеки сайт с пиксел и служи само за изпращане на събития.
+       Тайна е access token-ът, а той не живее тук и не влиза в проекта.
+
+       Въпреки че е попълнен, пикселът не се зарежда, докато посетителят
+       не даде съгласие за реклама. Виж loadMetaPixel(). */
+    metaPixelId: '1666581461701404',
 
     /* Включва подробен изход в конзолата. В production остава false. */
     debug: false

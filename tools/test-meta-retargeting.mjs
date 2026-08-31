@@ -125,10 +125,23 @@ const metaEvents = (calls) => calls.fbq
 G('Конфигурация');
 
 const tracking = read('assets/js/bds-tracking.js');
-check('Pixel ID идва от една централна стойност',
-  /metaPixelId: ''/.test(tracking));
-check('няма измислен Pixel ID в кода',
-  !/metaPixelId:\s*'\d+'/.test(tracking) && !/fbq\('init',\s*'\d+'/.test(tracking));
+
+/* Датасетът „BDS Website“ в Meta. Pixel ID не е тайна — вижда се в кода
+   на всеки сайт с пиксел. Тайна е access token-ът, а той не е тук. */
+const META_PIXEL_ID = '1666581461701404';
+
+const cfgPixel = /metaPixelId:\s*'([^']*)'/.exec(tracking);
+check('Pixel ID идва от една централна стойност', !!cfgPixel);
+check('Pixel ID е реалният, не измислен',
+  cfgPixel && cfgPixel[1] === META_PIXEL_ID, cfgPixel ? cfgPixel[1] : '');
+check('Pixel ID е само в конфигурацията, не разпръснат из кода',
+  (read('assets/js/app.js').includes(META_PIXEL_ID)) === false &&
+  (read('restaurants.html').includes(META_PIXEL_ID)) === false);
+check('base code не е копиран в HTML',
+  !/connect\.facebook\.net/.test(read('restaurants.html')) &&
+  !/connect\.facebook\.net/.test(read('index.html')));
+check('fbq init взима ID от конфигурацията, не от литерал',
+  /fbq\('init', CONFIG\.metaPixelId\)/.test(tracking));
 check('Pixel ID не е записан в HTML',
   !/connect\.facebook\.net/.test(read('restaurants.html')));
 check('няма втори, паралелен tracker',
@@ -439,21 +452,37 @@ check('не твърди, че рекламни бисквитки не се п�
   !/не използваме реклам/i.test(privacy));
 check('казва, че съгласието може да се смени',
   /Настройки за бисквитките|може да се смени|оттегл/i.test(privacy));
-check('не обещава повече, отколкото кодът прави',
-  /Към момента — никоя/.test(privacy) === (/metaPixelId: ''/.test(tracking)),
-  'страницата и кодът трябва да казват едно и също за това дали нещо е включено');
+/* Страницата и кодът трябва да казват едно и също. Щом пикселът е
+   конфигуриран, политиката не бива да твърди, че нищо не е включено. */
+const pixelConfigured = !!(cfgPixel && cfgPixel[1]);
+check('политиката не твърди „нищо не е включено“, щом пиксел има',
+  pixelConfigured ? !/Към момента — никоя/.test(privacy) : true);
+check('Meta е описана като конфигурирана',
+  !pixelConfigured || /единствената конфигурирана/.test(privacy));
+check('описано е кога се зарежда — след съгласие',
+  !pixelConfigured || /само след като изберете/.test(privacy));
+check('изброени са бисквитките поименно',
+  !pixelConfigured || (/_fbp/.test(privacy) && /_fbc/.test(privacy)));
+check('казано е какво НЕ се изпраща',
+  !pixelConfigured || /Не<\/b> се изпращат име, телефон, имейл/.test(privacy));
+check('GA4 и Google Ads са отбелязани като още неконфигурирани',
+  /още не са конфигурирани/.test(privacy));
+check('оттеглянето на съгласие е описано',
+  /оттегля по всяко време/.test(privacy));
 
 /* ============================================================
    9. Външният блокер
    ============================================================ */
 G('Външно състояние');
 
-if (/metaPixelId: ''/.test(tracking)) {
-  blocked('Жив Meta Pixel', 'BLOCKED — META PIXEL ID REQUIRED (няма Meta Business акаунт)');
-  blocked('Аудитории в Meta', 'BLOCKED — META BUSINESS / PIXEL REQUIRED');
-} else {
-  check('Pixel ID е попълнен', true);
-}
+check('Pixel ID е попълнен и кодът е готов да го ползва', pixelConfigured);
+/* Аудиториите се създават в Meta UI. Repository-то няма Meta API
+   креденшъли, значи оттук те не могат нито да се създадат, нито да се
+   проверят. Стъпките са в marketing/meta-retargeting-live-setup.md. */
+blocked('Custom Audiences в Meta',
+  'MANUAL — създават се в Meta Ads Manager (няма API креденшъли в проекта)');
+blocked('Проверка с Test Events',
+  'MANUAL — иска реален браузър със съгласие и Meta Events Manager');
 
 console.log('');
 process.exit(R.summary() ? 0 : 1);

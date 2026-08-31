@@ -268,7 +268,7 @@ node tools/generate-proposal.mjs --brief моя.json --id BDS-PROP-2026-0007
 
 | Свойство | Пример | Тайна? |
 |---|---|---|
-| `META_AD_ACCOUNT_ID` | `act_1234567890` | не |
+| `META_AD_ACCOUNT_ID` | `act_1516967893518549` — акаунт **BDS Ads** | не |
 | `META_ACCESS_TOKEN` | дълготраен токен | **да** |
 
 Въвеждат се в **Project Settings → Script Properties** — никога в кода,
