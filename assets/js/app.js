@@ -118,7 +118,7 @@
         '<div class="footer__col reveal" data-delay="4"><h4>Контакти</h4>' +
           '<span>Преслав Блажев</span>' +
           '<a href="mailto:info@bulgaria-digital-services.com">info@bulgaria-digital-services.com</a><a href="tel:+359877364001">0877 364 001</a>' +
-          '<span>с. Къшин, общ. Плевен<br>ул. „Кирил и Методий“ 8</span>' +
+          '<span>Варна<br>ул. „Стара Планина“ 31</span>' +
           '<span>Отговаряме 24/7 · България</span><a href="contact.html">Запитване</a></div>' +
       '</div>' +
       '<div class="container footer__bottom">' +
@@ -211,6 +211,28 @@
   // Запазен е само като кука за евентуален бъдещ стил.
   requestAnimationFrame(function () {
     document.body.classList.add('loaded');
+  });
+
+  /* ---------- Връщане назад ----------
+     При клик по вътрешна връзка завесата се спуска: `.cover` пуска
+     анимация с `forwards`, тоест елементът ОСТАВА върху целия екран.
+
+     Натиснеш ли после „назад“, браузърът връща страницата от bfcache —
+     DOM-ът се възстановява точно какъвто е бил при напускането, заедно
+     със спуснатата завеса. `load` не се задейства повторно, значи няма
+     кой да я вдигне: екранът остава празен, а `pointer-events: all`
+     изяжда и кликовете. Рефрешът „оправя“ нещата само защото строи
+     страницата наново.
+
+     `pageshow` се задейства и при нормално зареждане, и при връщане от
+     bfcache. Затова вдигаме завесата тук, безусловно. */
+  window.addEventListener('pageshow', function () {
+    overlay.classList.remove('cover');
+    overlay.classList.add('reveal-on-load');
+    /* Ако някой е напуснал, преди преloader-ът да се махне, и той се
+       връща от кеша — а неговият `load` също няма да дойде втори път. */
+    var stale = document.querySelector('.preloader');
+    if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
   });
 
   function isInternal(a) {

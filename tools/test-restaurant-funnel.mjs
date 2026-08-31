@@ -575,6 +575,27 @@ async function browserTests(base) {
     }
   }
 
+  G('Браузър — връщане назад');
+  await session(async (p) => {
+    await go(p, base + '/restaurants', 2200);
+    /* Завесата се спуска при клик по вътрешна връзка и ОСТАВА спусната:
+       animation-fill-mode е forwards. При връщане от bfcache браузърът
+       възстановява DOM-а точно такъв — с покрит екран — а `load` не идва
+       втори път, значи никой не я вдига. Оттам и празният екран, който
+       се „оправя“ с рефреш. Проверява се, че pageshow я вдига. */
+    await p.eval("document.querySelector('.page-transition').classList.add('cover')");
+    await sleep(600);
+    const covered = JSON.parse(await p.eval("JSON.stringify((function(){var o=document.querySelector(\".page-transition\");var r=o.getBoundingClientRect();var st=getComputedStyle(o);return { covers: r.top<=1 && r.height>=window.innerHeight-2 };})())"));
+    check('завесата наистина покрива екрана', covered.covers);
+
+    await p.eval("window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))");
+    await sleep(400);
+    const after = JSON.parse(await p.eval("JSON.stringify((function(){var o=document.querySelector(\".page-transition\");var r=o.getBoundingClientRect();var st=getComputedStyle(o);return { covers: r.top<=1 && r.height>=window.innerHeight-2, pointer: st.pointerEvents, preloader: !!document.querySelector(\".preloader\") };})())"));
+    check('при връщане назад завесата се вдига', !after.covers);
+    check('кликовете не остават блокирани', after.pointer === 'none', after.pointer);
+    check('не остава залепнал preloader', !after.preloader);
+  });
+
   G('Браузър — съгласие');
   await session(async (p, errs) => {
     const external = [];
