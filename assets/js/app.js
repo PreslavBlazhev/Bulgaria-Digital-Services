@@ -461,6 +461,28 @@
       submitLead(lead).then(function (res) {
         if (submitBtn) submitBtn.classList.remove('is-loading');
         if (res && (res.success === 'true' || res.success === true)) {
+          /* Конверсията се брои ЧАК тук — след потвърден успех от
+             сървъра. Не при клик, не при валидация, не при мрежова
+             грешка. Дълго време тази форма не пращаше нищо: цялата
+             инструментация седеше само на ресторантската форма, а
+             CTA-тата на /restaurants водят точно насам.
+
+             eventID позволява на Meta да схлупи дублиранията, ако
+             някой натисне два пъти или ако по-късно се добави
+             сървърният Conversions API. */
+          var contactEventId = 'lead-' + Date.now().toString(36) + '-' +
+            Math.random().toString(36).slice(2, 10);
+          if (window.BDSAnalytics) {
+            window.BDSAnalytics.track('generate_lead', {
+              lead_event_id: contactEventId,
+              lead_type: 'contact',
+              /* Само неличните полета. Име, телефон, имейл и съобщение
+                 остават единствено в имейла до собственика. */
+              service: lead.service || 'не е посочена',
+              business_type: lead.businessType || 'не е посочен',
+              source_page: location.pathname
+            });
+          }
           showNote('Благодарим! Запитването е изпратено — ще се свържем с вас скоро.', 'success');
           form.reset();
         } else {
@@ -973,6 +995,29 @@
 
     window.dataLayer = window.dataLayer || [];
 
+    /* ---------- Контекст на фунията ----------
+       CTA-тата на /restaurants водят към /contact.html. Значи човекът
+       сменя страницата по средата на пътя и `data-page` вече не казва
+       откъде е тръгнал.
+
+       Затова посещението на ресторантската страница се запомня за
+       сесията. Оттам нататък попълването на общата форма се брои за
+       ресторантско — и аудиторията „започнали формата“ съдържа точно
+       хората, дошли от ресторантската реклама, а не всеки, който е
+       отворил „Контакти“ от менюто. */
+    var FUNNEL_KEY = 'bds_funnel';
+
+    function rememberFunnel(name) {
+      try { sessionStorage.setItem(FUNNEL_KEY, name); } catch (e) {}
+    }
+
+    function funnelContext() {
+      if (isRestaurant) return 'restaurant';
+      try {
+        return sessionStorage.getItem(FUNNEL_KEY) || 'general';
+      } catch (e) { return 'general'; }
+    }
+
     function track(event, data) {
       var params = (T && T.scrub ? T.scrub(data) : data) || {};
       var payload = { event: event, page_path: location.pathname };
@@ -1007,6 +1052,13 @@
                формата, но не изпратили“ — тя е най-ценната за
                retargeting. */
             T.meta('trackCustom', 'RestaurantFormStart');
+          } else if (event === 'contact_form_start') {
+            /* Същото събитие, но само за хората, дошли от
+               ресторантската страница. Който е отворил „Контакти“
+               направо от менюто, няма работа в тази аудитория. */
+            if (payload.funnel === 'restaurant') {
+              T.meta('trackCustom', 'RestaurantFormStart');
+            }
           } else if (event === 'restaurant_page_view') {
             /* Отделно от PageView: то се праща на всяка страница, а
                това — само на /restaurants. Аудиторията „посетители на
@@ -1056,6 +1108,10 @@
           lead_event_id: leadId || undefined
         });
       } else {
+        /* Запомня се ПРЕДИ събитието: CTA-то оттук води към
+           /contact.html и там този флаг е единственото, което казва
+           че човекът идва от ресторантската фуния. */
+        rememberFunnel('restaurant');
         track('restaurant_page_view', { referrer: document.referrer || 'direct' });
       }
     }
@@ -1087,28 +1143,35 @@
       }
     });
 
-    /* ---------- Първо докосване на формата ---------- */
-    var rform = document.getElementById('restaurantForm');
-    if (rform) {
-      var started = false;
-      /* „Започнал формата“ значи ЧОВЕК я е докоснал.
+    /* ---------- Първо докосване на форма ----------
 
-         isTrusted отсява фокуса, сложен от код: при грешка във
-         валидацията сами извикваме .focus() върху първото сгрешено
-         поле, а autofocus и възстановяването на фокуса при връщане
-         назад също раждат focusin. Всяко от тях би надуло
-         аудиторията „започнали, но не изпратили“ с хора, които не са
-         пипали нищо. */
-      var markStarted = function (e) {
+       И ДВЕТЕ форми се следят. Дълго време се следеше само
+       `#restaurantForm`, а CTA-тата на /restaurants водят към
+       /contact.html — тоест точно хората, тръгнали от рекламата,
+       попълваха формата, за която нямаше нито едно събитие.
+
+       „Започнал формата“ значи ЧОВЕК я е докоснал. isTrusted отсява
+       фокуса, сложен от код: при грешка във валидацията сами викаме
+       .focus() върху първото сгрешено поле, а autofocus и
+       възстановяването на фокуса при връщане назад също раждат
+       focusin. Всяко от тях би надуло аудиторията „започнали, но не
+       изпратили“ с хора, които не са пипали нищо. */
+    function watchFormStart(el, eventName) {
+      if (!el) return;
+      var started = false;
+      var mark = function (e) {
         if (started) return;
         if (e && e.isTrusted === false) return;
         started = true;                       /* веднъж на зареждане */
-        track('restaurant_form_start', {});
+        track(eventName, { funnel: funnelContext() });
       };
-      rform.addEventListener('focusin', markStarted);
+      el.addEventListener('focusin', mark);
       /* Ако браузърът попълни автоматично, фокус може и да няма. */
-      rform.addEventListener('input', markStarted);
+      el.addEventListener('input', mark);
     }
+
+    watchFormStart(document.getElementById('restaurantForm'), 'restaurant_form_start');
+    watchFormStart(document.getElementById('contactForm'), 'contact_form_start');
   })();
 
   /* ---------- Project filters ---------- */

@@ -575,6 +575,73 @@ async function browserTests(base) {
     }
   }
 
+  G('Браузър — пътят до /contact.html');
+  await session(async (p, errs, posts) => {
+    /* Реалният път на човек от рекламата: ресторантската страница,
+       после CTA към общата форма. Дълго време цялата инструментация
+       седеше само на #restaurantForm — тоест точно този път не
+       произвеждаше нито RestaurantFormStart, нито Lead. */
+    await p.send('Page.addScriptToEvaluateOnNewDocument', { source: "(function(){  try {    localStorage.setItem(\"bds_consent\", JSON.stringify({      version: 1, analytics: true, ads: true, at: new Date().toISOString()    }));  } catch (e) {}  function push(rec){    try {      var all = JSON.parse(sessionStorage.getItem(\"__bds_meta\") || \"[]\");      all.push(rec);      sessionStorage.setItem(\"__bds_meta\", JSON.stringify(all));    } catch (e) {}  }  var held;  Object.defineProperty(window, \"BDSTracking\", {    configurable: true,    get: function(){ return held; },    set: function(v){      held = v;      if (v && typeof v.meta === \"function\") {        var real = v.meta;        v.meta = function(kind, name, params, opts){          push({ kind: kind, name: name, params: params || {}, opts: opts || null });          return real.apply(v, arguments);        };      }    }  });})()" });
+
+    await go(p, base + '/restaurants', 2400);
+    const onLanding = JSON.parse(await p.eval("sessionStorage.getItem(\"__bds_meta\") || \"[]\""));
+    check('на /restaurants тръгва RestaurantLandingView',
+      onLanding.some(e => e.name === 'RestaurantLandingView'),
+      onLanding.map(e => e.name).join(', ') || 'нищо');
+    /* PageView се праща от loadMetaPixel() директно през fbq, не през
+       meta(), затова не минава през прихващача. Че се зарежда изобщо,
+       се проверява в групата „съгласие“ и се вижда в Meta Test Events. */
+
+    /* Преход към общата форма — както го прави CTA-то. */
+    await go(p, base + '/contact.html', 2400);
+    const funnel = await p.eval("sessionStorage.getItem('bds_funnel')");
+    check('контекстът на фунията оцелява при смяна на страницата',
+      funnel === 'restaurant', String(funnel));
+
+    /* Истинско писане през браузъра, не dispatchEvent: кодът нарочно
+       отхвърля събития с isTrusted:false, за да не брои фокус, сложен
+       от скрипт. Само така се проверява това, което прави човек. */
+    await p.eval("document.getElementById('contactForm').elements.name.focus()");
+    await sleep(200);
+    await p.send('Input.insertText', { text: 'QA TEST - not a real person' });
+    await sleep(600);
+    await p.eval("(function(){var f=document.getElementById('contactForm');f.elements.email.value='qa-test@example.invalid';f.elements.phone.value='0000000000';f.elements.message.value='QA synthetic submission';return 'ok';})()");
+    await sleep(800);
+    const afterStart = JSON.parse(await p.eval("sessionStorage.getItem(\"__bds_meta\") || \"[]\""));
+    const starts = afterStart.filter(e => e.name === 'RestaurantFormStart');
+    check('истинско докосване праща RestaurantFormStart', starts.length > 0,
+      afterStart.map(e => e.name).join(', ') || 'нищо');
+    check('RestaurantFormStart тръгва точно веднъж', starts.length === 1,
+      starts.length + ' пъти');
+
+    await p.eval("document.getElementById('contactForm').requestSubmit()");
+    await sleep(2800);
+    const afterSubmit = JSON.parse(await p.eval("sessionStorage.getItem(\"__bds_meta\") || \"[]\""));
+    const leads = afterSubmit.filter(e => e.name === 'Lead');
+    check('успешното изпращане праща Lead', leads.length > 0,
+      afterSubmit.map(e => e.name).join(', ') || 'нищо');
+    check('Lead тръгва точно веднъж', leads.length === 1, leads.length + ' пъти');
+    check('Lead е стандартно събитие с eventID',
+      leads[0] && leads[0].kind === 'track' && !!(leads[0].opts && leads[0].opts.eventID),
+      leads[0] ? JSON.stringify(leads[0].opts) : '');
+    check('Lead не носи параметри към Meta',
+      leads[0] && JSON.stringify(leads[0].params) === '{}',
+      leads[0] ? JSON.stringify(leads[0].params) : '');
+
+    const flat = JSON.stringify(afterSubmit);
+    check('нищо лично не тръгва към Meta',
+      !/not a real person/.test(flat) && !/example\\.invalid/.test(flat) &&
+      !/0000000000/.test(flat), flat.slice(0, 140));
+
+    check('заявката наистина е изпратена', posts().length === 1,
+      posts().length + ' заявки');
+
+    /* localStorage е споделен по origin. Оставено съгласие тук би
+       направило следващата сесия „вече избрал“ и проверката „преди
+       избор: нула заявки“ би паднала без вина. */
+    await p.eval("try{localStorage.removeItem('bds_consent');sessionStorage.clear();}catch(e){}");
+  });
+
   G('Браузър — връщане назад');
   await session(async (p) => {
     await go(p, base + '/restaurants', 2200);

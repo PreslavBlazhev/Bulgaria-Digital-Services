@@ -376,7 +376,19 @@ check('при отказ от сървъра се хвърля грешка, н�
 G('Кога се пали RestaurantFormStart');
 check('иска истинско докосване от човек', /e\.isTrusted === false/.test(appJs));
 check('пази се да не се повтори', /if \(started\) return;/.test(appJs));
-check('хваща и автоматично попълване', /addEventListener\('input', markStarted\)/.test(appJs));
+check('хваща и автоматично попълване', /addEventListener\('input', mark\)/.test(appJs));
+/* CTA-тата на /restaurants водят към /contact.html — ако се следи само
+   ресторантската форма, точно рекламният трафик остава без събития. */
+check('следят се И ДВЕТЕ форми',
+  /watchFormStart\(document\.getElementById\('restaurantForm'\)/.test(appJs) &&
+  /watchFormStart\(document\.getElementById\('contactForm'\)/.test(appJs));
+check('контактната форма праща конверсия при потвърден успех',
+  /res\.success === 'true'[\s\S]{0,900}?lead_type: 'contact'/.test(appJs));
+check('контекстът на фунията преживява смяната на страница',
+  /sessionStorage\.setItem\(FUNNEL_KEY/.test(appJs) &&
+  /rememberFunnel\('restaurant'\)/.test(appJs));
+check('RestaurantFormStart от контактната форма иска ресторантски контекст',
+  /contact_form_start'\)[\s\S]{0,300}?payload\.funnel === 'restaurant'/.test(appJs));
 check('обяснено е защо programmatic focus не се брои',
   /\.focus\(\) върху първото сгрешено/.test(appJs));
 
