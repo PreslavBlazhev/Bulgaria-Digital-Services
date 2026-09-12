@@ -33,6 +33,7 @@ const SUITES = [
   { name: 'Google Ads активи и котви', file: 'tools/test-google-ads-assets.mjs', args: BROWSER ? ['--browser'] : [] },
   { name: 'Внос на реклами (Phase 19)', file: 'tools/test-ads-import.mjs', args: [] },
   { name: 'Meta retargeting (Phase 21)', file: 'tools/test-meta-retargeting.mjs', args: [] },
+  { name: 'Google Tag Manager и съгласие (Phase 25)', file: 'tools/test-gtm.mjs', args: BROWSER ? ['--browser'] : [] },
   { name: 'Социално съдържание (Phase 22)', file: 'tools/test-social-content.mjs', args: [] }
 ];
 

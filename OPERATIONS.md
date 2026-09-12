@@ -86,6 +86,7 @@ BDS_OPS_TOKEN=xxx node tools/test-live-ops.mjs   срещу живата таб�
 | `test-marketing-pipeline.mjs` | че второ пускане не удвоява и изтрито изчезва |
 | `test-proposal-workflow.mjs` | номера, валидността, цената |
 | `test-ads-import.mjs` | че двете реализации на UPSERT-а не са се разминали |
+| `test-gtm.mjs` | един контейнер на страница, редът в `<head>`, липсата на втори GA4 loader, отказът |
 | `test-live-ops.mjs` | цялото пътуване в **истинската** таблица, без нито един макет |
 
 ---

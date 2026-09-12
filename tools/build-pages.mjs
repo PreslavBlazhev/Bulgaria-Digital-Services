@@ -55,7 +55,7 @@ function write(rel, content) {
 }
 
 /** Заменя съдържанието между <!-- BDS:GEN start:name --> и <!-- BDS:GEN end --> */
-function patchRegion(rel, name, html) {
+function patchRegion(rel, name, html, indent = '        ') {
   const abs = join(ROOT, rel);
   if (!existsSync(abs)) throw new Error(`Липсва файл за пач: ${rel}`);
   const src = readFileSync(abs, 'utf8');
@@ -65,9 +65,47 @@ function patchRegion(rel, name, html) {
   const e = src.indexOf(endTag);
   if (s === -1 || e === -1) throw new Error(`Липсва маркер "${name}" в ${rel}`);
   const next =
-    src.slice(0, s + startTag.length) + '\n' + html + '\n        ' + src.slice(e);
+    src.slice(0, s + startTag.length) + '\n' + html + '\n' + indent + src.slice(e);
   writeFileSync(abs, next, 'utf8');
   if (!written.includes(rel)) written.push(rel);
+}
+
+/* ---------- 2б. Google Tag Manager ----------
+   ID-то НЕ се пише тук. Чете се от assets/js/bds-tracking.js, който е
+   централната конфигурация за всичко рекламно. Така снипетът в
+   страниците и кодът, който чете CONFIG.gtmId, не могат да се
+   разминат: единият се генерира от другия.
+
+   Редът в <head> е задължителен и е обяснен в bds-tracking.js —
+   първо конфигурацията (синхронно, за да влезе consent default-ът в
+   dataLayer), чак после контейнерът. */
+const GTM_ID = (function () {
+  const src = readFileSync(join(ROOT, 'assets/js/bds-tracking.js'), 'utf8');
+  const m = /gtmId:\s*'([^']*)'/.exec(src);
+  if (!m || !m[1]) throw new Error('bds-tracking.js няма попълнен gtmId');
+  if (!/^GTM-[A-Z0-9]+$/.test(m[1])) throw new Error('gtmId не прилича на GTM ID: ' + m[1]);
+  return m[1];
+})();
+
+/** Блокът за <head>. `base` е префиксът към корена (за подпапки). */
+function gtmHead(base = '') {
+  return `  <script src="${base}assets/js/bds-tracking.js"></script>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','${GTM_ID}');</script>
+  <!-- End Google Tag Manager -->`;
+}
+
+/** Блокът непосредствено след отварящия <body>. Резервният път за
+    посетител без JavaScript — затова е iframe, а не скрипт. */
+function gtmBody() {
+  return `  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->`;
 }
 
 /* ---------- 3. Блокове ---------- */
@@ -846,6 +884,9 @@ function caseHead(p) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- BDS:GEN start:gtm-head -->
+${gtmHead()}
+  <!-- BDS:GEN end:gtm-head -->
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(desc)}" />${robots}
   <meta name="theme-color" content="#08080a" />
@@ -957,6 +998,9 @@ ${p.verified.map((f) => `              <dl class="cs-fact"><dt>${esc(f.label)}</
 
   return `${caseHead(p)}
 <body data-page="projects">
+  <!-- BDS:GEN start:gtm-body -->
+${gtmBody()}
+  <!-- BDS:GEN end:gtm-body -->
   <div class="bg-aurora" aria-hidden="true"></div>
   <div class="bg-grid" aria-hidden="true"></div>
   <div id="site-header"></div>
@@ -1020,6 +1064,7 @@ ${nextCards}
 
   <div id="site-footer"></div>
   <script src="assets/js/bds-data.js" defer></script>
+  <script src="assets/js/bds-consent.js" defer></script>
   <script src="assets/js/app.js" defer></script>
 </body>
 </html>
@@ -1250,6 +1295,30 @@ patchRegion('restaurants.html', 'restaurant-trust', restaurantTrustHtml());
 patchRegion('restaurants.html', 'restaurant-packages', restaurantPackagesHtml());
 patchRegion('restaurants.html', 'restaurant-system', restaurantSystemHtml());
 patchRegion('restaurants.html', 'restaurant-maintenance', restaurantMaintenanceHtml());
+/* Google Tag Manager — един и същ блок във всяка публична страница.
+   Списъкът е изброен, а не отгатнат от папката, защото не всеки .html
+   е публична страница: print/packages-print.html е източник за PDF,
+   Disallow е в robots.txt и няма банер за съгласие — контейнер там не
+   влиза. Case страниците не са в списъка: те се генерират изцяло
+   по-долу и носят блока от шаблона. */
+const GTM_PAGES = [
+  ['index.html', ''],
+  ['services.html', ''],
+  ['packages.html', ''],
+  ['projects.html', ''],
+  ['process.html', ''],
+  ['about.html', ''],
+  ['contact.html', ''],
+  ['privacy.html', ''],
+  ['terms.html', ''],
+  ['restaurants.html', ''],
+  ['restaurants/thank-you.html', '../']
+];
+for (const [page, base] of GTM_PAGES) {
+  patchRegion(page, 'gtm-head', gtmHead(base), '  ');
+  patchRegion(page, 'gtm-body', gtmBody(), '  ');
+}
+
 
 for (const p of D.projects) {
   if (p.status === 'main' && p.page) write(p.page, casePage(p));

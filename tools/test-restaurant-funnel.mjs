@@ -17,10 +17,10 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { spawn, spawnSync } from 'node:child_process';
-import os from 'node:os';
+/* Сървърът, Chrome и CDP клиентът са общи с другите браузърни проверки. */
+import { sleep, startServer, launchChrome, newPage, respawnForWebSocket }
+  from './lib/browser-kit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -28,15 +28,7 @@ const WANT_BROWSER = args.includes('--browser');
 const REMOTE = (() => { const i = args.indexOf('--url'); return i !== -1 ? args[i + 1] : null; })();
 
 /* WebSocket липсва при Node 21 без флаг — рестартирай се с него. */
-if (WANT_BROWSER && typeof WebSocket === 'undefined') {
-  if (process.env.__BDS_RESPAWNED) {
-    console.error('WebSocket не е наличен дори с --experimental-websocket. Нужен е Node 21+.');
-    process.exit(1);
-  }
-  const r = spawnSync(process.execPath, ['--experimental-websocket', fileURLToPath(import.meta.url), ...args],
-    { stdio: 'inherit', env: { ...process.env, __BDS_RESPAWNED: '1' } });
-  process.exit(r.status ?? 1);
-}
+if (WANT_BROWSER) respawnForWebSocket(import.meta.url, args);
 
 /* ---------- отчитане ---------- */
 const results = [];
@@ -48,7 +40,6 @@ function check(name, ok, detail = '') {
   console.log(tag + ' ' + name + (detail ? '  \x1b[2m' + detail + '\x1b[0m' : ''));
   return !!ok;
 }
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 /* ============================================================
    ЧАСТ 1 — статични проверки върху файловете
@@ -123,8 +114,18 @@ function staticTests() {
     const scripts = tags(html, 'script').map(attrs).filter(a => a.src);
     const brokenScript = scripts.filter(a => !/^https?:/.test(a.src) && !fs.existsSync(path.resolve(dir, a.src)));
     check('всеки скрипт съществува', brokenScript.length === 0, brokenScript.map(a => a.src).join(', '));
+    /* Един синхронен скрипт е разрешен и е нарочен: bds-tracking.js
+       трябва да сложи consent default-а в dataLayer ПРЕДИ снипета на
+       GTM. С defer това се случва след контейнера и съгласието губи
+       смисъл. Затова проверката е двойна — че няма ДРУГ блокиращ
+       скрипт и че bootstrap-ът е точно един, а не два. */
     const blocking = scripts.filter(a => !/^https?:/.test(a.src) && !('defer' in a) && !('async' in a));
-    check('няма блокиращи локални скриптове', blocking.length === 0, blocking.map(a => a.src).join(', '));
+    const CONSENT_BOOTSTRAP = /(^|\/)assets\/js\/bds-tracking\.js$/;
+    const unexpected = blocking.filter(a => !CONSENT_BOOTSTRAP.test(a.src));
+    check('няма блокиращи локални скриптове извън consent bootstrap-а',
+      unexpected.length === 0, unexpected.map(a => a.src).join(', '));
+    check('consent bootstrap-ът е точно един и е синхронен',
+      blocking.length === 1, blocking.map(a => a.src).join(', ') || 'няма');
 
     const links = tags(html, 'link').map(attrs).filter(a => a.rel === 'stylesheet');
     const brokenCss = links.filter(a => !/^https?:/.test(a.href) && !fs.existsSync(path.resolve(dir, a.href)));
@@ -232,98 +233,16 @@ function staticTests() {
    ЧАСТ 2 — статичен сървър за браузърните тестове
    ============================================================ */
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8', '.json': 'application/json' };
-
-function startServer() {
-  /* Чете _redirects, за да се държи като Netlify. */
-  const rules = read('_redirects').split('\n')
-    .map(l => l.trim()).filter(l => l && !l.startsWith('#'))
-    .map(l => l.split(/\s+/)).filter(p => p.length >= 2)
-    .map(p => ({ from: p[0], to: p[1], code: parseInt(p[2] || '301', 10) }));
-
-  const server = http.createServer((req, res) => {
-    let u = decodeURIComponent(req.url.split('?')[0]);
-    const rule = rules.find(r => r.from === u);
-    if (rule) { res.writeHead(rule.code, { Location: rule.to }); return res.end(); }
-    if (u === '/') u = '/index.html';
-    let f = path.join(ROOT, u);
-    if (!path.extname(f) && fs.existsSync(f + '.html')) f += '.html';
-    if (!f.startsWith(ROOT)) { res.writeHead(403); return res.end('403'); }
-    fs.readFile(f, (err, data) => {
-      if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('404'); }
-      res.writeHead(200, { 'Content-Type': MIME[path.extname(f).toLowerCase()] || 'application/octet-stream' });
-      res.end(data);
-    });
-  });
-  return new Promise(r => server.listen(0, () => r({ server, port: server.address().port })));
-}
-
-/* ---------- минимален CDP клиент ---------- */
-function findChrome() {
-  const candidates = [
-    process.env.CHROME_PATH,
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser',
-  ].filter(Boolean);
-  return candidates.find(c => { try { return fs.existsSync(c); } catch { return false; } });
-}
-
-async function launchChrome() {
-  const bin = findChrome();
-  if (!bin) return null;
-  const port = 9500 + Math.floor(Math.random() * 400);
-  const udd = path.join(os.tmpdir(), 'bds-funnel-test-' + Date.now());
-  const proc = spawn(bin, ['--headless=new', '--remote-debugging-port=' + port, '--user-data-dir=' + udd,
-    '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--hide-scrollbars'],
-    { stdio: 'ignore' });
-  for (let i = 0; i < 100; i++) {
-    try { if ((await fetch('http://127.0.0.1:' + port + '/json/version')).ok) return { proc, port, udd }; } catch {}
-    await sleep(200);
-  }
-  try { proc.kill(); } catch {}
-  return null;
-}
-
-async function newPage(port) {
-  const t = await (await fetch('http://127.0.0.1:' + port + '/json/new?about:blank', { method: 'PUT' })).json();
-  const ws = new WebSocket(t.webSocketDebuggerUrl);
-  let id = 0; const pending = new Map(); const handlers = [];
-  const ready = new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
-  ws.onmessage = (ev) => {
-    const m = JSON.parse(ev.data);
-    if (m.id && pending.has(m.id)) {
-      const { res, rej } = pending.get(m.id); pending.delete(m.id);
-      m.error ? rej(new Error(m.error.message)) : res(m.result);
-    } else if (m.method) handlers.forEach(h => h(m));
-  };
-  await ready;
-  const api = {
-    on: (fn) => handlers.push(fn),
-    send(method, params = {}) {
-      const myId = ++id;
-      return new Promise((res, rej) => {
-        pending.set(myId, { res, rej });
-        ws.send(JSON.stringify({ id: myId, method, params }));
-        setTimeout(() => { if (pending.has(myId)) { pending.delete(myId); rej(new Error('timeout ' + method)); } }, 30000);
-      });
-    },
-    async eval(expr) {
-      const r = await api.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
-      return r.result?.value;
-    },
-    close() { try { ws.close(); } catch {} },
-  };
-  return api;
-}
+/* Статичният сървър, Chrome и CDP клиентът живеят в
+   tools/lib/browser-kit.mjs — същата машинария ползва и проверката
+   на Google Tag Manager. Едно копие, една поправка. */
 
 /* ============================================================
    ЧАСТ 3 — браузърни проверки
    ============================================================ */
 
 async function browserTests(base) {
-  const chrome = await launchChrome();
+  const chrome = await launchChrome('bds-funnel-test');
   if (!chrome) { check('Chrome е наличен', false, 'не е намерен — браузърните тестове се пропускат'); return; }
 
   /** Отваря страница с прихванат FormSubmit. Нула реални имейли. */
@@ -340,6 +259,12 @@ async function browserTests(base) {
     });
     await p.send('Page.enable'); await p.send('Runtime.enable');
     await p.send('Log.enable'); await p.send('Network.enable');
+    /* Бисквитките са на ниво браузър, не на таб — а всички сесии делят
+       един профил. Без това _fbp, оставен от сесия с дадено съгласие,
+       се появява в сесия, която тепърва отказва, и обвинява кода в
+       нещо, което не е правил. Същата причина като собствения ключ за
+       localStorage по-горе. */
+    await p.send('Network.clearBrowserCookies');
     /* Реалният посетител почти никога не е с намалена анимация; headless по
        подразбиране е — а това крие поведението, което искаме да тестваме. */
     await p.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
@@ -515,6 +440,12 @@ async function browserTests(base) {
     });
   }
 
+  /* Контейнерът на Google Tag Manager се зарежда с отварянето на
+     страницата — това е официалната инсталация и тя е нарочна.
+     Договорът не е „навън не тръгва нищо“, а „нищо не се записва и
+     нищо рекламно не тръгва, докато посетителят не избере“. Точно
+     тази граница се проверява тук, и то поотделно: контейнер, мрежи,
+     бисквитки. Слети в едно, първото би скрило останалите две. */
   G('Браузър — проследяване без съгласие');
   await session(async (p) => {
     const external = [];
@@ -525,7 +456,13 @@ async function browserTests(base) {
       }
     });
     await go(p, AD, 2600);
-    check('нула заявки към рекламни мрежи без съгласие', external.length === 0, external.join(' | '));
+    const container = external.filter(u => /googletagmanager\.com\/(gtm\.js|ns\.html)/.test(u));
+    const adNets = external.filter(u => /connect\.facebook|doubleclick|googleadservices/.test(u));
+    check('контейнерът на GTM се зарежда', container.length > 0, container.length + ' заявки');
+    check('без съгласие нищо рекламно не тръгва', adNets.length === 0, adNets.join(' | '));
+    const cookies = await p.eval('document.cookie');
+    check('без съгласие няма аналитични и рекламни бисквитки',
+      !/(^|;\s*)(_ga|_gid|_gcl_|_fbp|_fbc)/.test(cookies || ''), cookies || 'няма');
     const t = JSON.parse(await p.eval('JSON.stringify(window.BDSTracking ? {c:window.BDSTracking.isConfigured(),l:window.BDSTracking.isLoaded(),s:window.BDSTracking.consentState()} : null)') || 'null');
     check('Consent Mode е denied по подразбиране', t && t.s.ad_storage === 'denied' && t.s.analytics_storage === 'denied');
   });
@@ -681,7 +618,9 @@ async function browserTests(base) {
       await p.eval("!!document.querySelector('[data-consent=\"reject\"]') && !!document.querySelector('[data-consent=\"accept\"]')"));
     check('банерът не мести съдържанието (fixed)',
       (await p.eval("getComputedStyle(document.querySelector('.consent')).position")) === 'fixed');
-    check('преди избор: нула заявки към рекламни мрежи', external.length === 0, external.join(' | '));
+    check('преди избор: нула заявки към рекламни мрежи',
+      external.filter(u => /connect\.facebook|doubleclick|googleadservices/.test(u)).length === 0,
+      external.join(' | '));
 
     /* Отказ */
     await p.eval("document.querySelector('[data-consent=\"reject\"]').click()");
@@ -690,7 +629,12 @@ async function browserTests(base) {
     check('отказ: analytics остава denied', st.analytics_storage === 'denied', st.analytics_storage);
     check('отказ: ads остава denied', st.ad_storage === 'denied', st.ad_storage);
     check('отказ: банерът се скрива', !(await p.eval("!!document.querySelector('.consent')")));
-    check('отказ: нула заявки към рекламни мрежи', external.length === 0, external.join(' | '));
+    check('отказ: нула заявки към рекламни мрежи',
+      external.filter(u => /connect\.facebook|doubleclick|googleadservices/.test(u)).length === 0,
+      external.join(' | '));
+    const afterReject = await p.eval('document.cookie');
+    check('отказ: не остава аналитична или рекламна бисквитка',
+      !/(^|;\s*)(_ga|_gid|_gcl_|_fbp|_fbc)/.test(afterReject || ''), afterReject || 'няма');
 
     /* Изборът преживява презареждане */
     await go(p, base + '/restaurants', 2400);
@@ -709,7 +653,10 @@ async function browserTests(base) {
     check('панелът има превключвател за анализ и за реклама',
       await p.eval("!!document.getElementById('consentAnalytics') && !!document.getElementById('consentAds')"));
 
-    /* Приемане на реклама */
+    /* Приемане на реклама. От тук нататък гледаме само какво добавя
+       СЪГЛАСИЕТО — иначе в списъка стоят контейнерите от трите
+       зареждания дотук и нищо не се вижда. */
+    external.length = 0;
     await p.eval("document.getElementById('consentAds').checked = true; document.getElementById('consentAnalytics').checked = true;");
     await p.eval("document.querySelector('[data-save]').click()");
     await sleep(1400);
@@ -718,15 +665,16 @@ async function browserTests(base) {
     check('приемане: ads става granted', st.ad_storage === 'granted', st.ad_storage);
     check('приемане: ad_user_data и ad_personalization също',
       st.ad_user_data === 'granted' && st.ad_personalization === 'granted');
-    /* Meta Pixel-ът вече е конфигуриран. Затова при дадено рекламно
+    /* Meta Pixel-ът е конфигуриран. Затова при дадено рекламно
        съгласие ТРЯБВА да се зареди — това е доказателството, че
        съгласието наистина отключва пиксела, а не че кодът мълчи,
        защото няма ID.
 
-       Google остава без ID и не се зарежда. Двете се проверяват
-       поотделно, за да не се крият едно зад друго. */
+       Контейнерът вече е на страницата от <head>. Съгласието му
+       изпраща update, а не втори скрипт: нов gtm.js тук би значел
+       двойна инсталация и удвоени числа. */
     const meta = external.filter(u => /connect\.facebook/.test(u));
-    const google = external.filter(u => /googletagmanager|google-analytics|doubleclick|googleadservices/.test(u));
+    const container2 = external.filter(u => /googletagmanager\.com\/(gtm\.js|ns\.html)/.test(u));
 
     check('след съгласие Meta Pixel се зарежда', meta.length > 0,
       meta.length + ' заявки');
@@ -734,8 +682,8 @@ async function browserTests(base) {
       meta.some(u => u.includes('1666581461701404')) ||
       meta.some(u => /fbevents\.js/.test(u)),
       meta[0] || '');
-    check('Google остава незареден — няма попълнено ID',
-      google.length === 0, google.join(' | '));
+    check('съгласието не зарежда втори контейнер',
+      container2.length === 0, container2.join(' | '));
     check('нула конзолни грешки в целия поток', errs().length === 0, errs().join(' | '));
   });
 
@@ -794,7 +742,7 @@ staticTests();
 
 if (WANT_BROWSER) {
   let base = REMOTE, srv = null;
-  if (!base) { srv = await startServer(); base = 'http://localhost:' + srv.port; }
+  if (!base) { srv = await startServer(ROOT); base = 'http://localhost:' + srv.port; }
   console.log('\n\x1b[2mбраузърни тестове срещу ' + base + '\x1b[0m');
   try { await browserTests(base.replace(/\/$/, '')); } finally { if (srv) srv.server.close(); }
 } else {

@@ -186,10 +186,12 @@ G('Съгласие — Meta тръгва само при разрешена р�
 }
 
 {
-  /* Google ID също е попълнен — иначе „анализът не се зарежда“ би
-     било вярно по грешна причина: няма какво да се зареди. */
+  /* Google също е конфигуриран — иначе „анализът не се зарежда“ би
+     било вярно по грешна причина: няма какво да се отключи.
+     Ключът е gtmId: GA4 живее вътре в контейнера, не като втори
+     loader, затова той е условието за отключване. */
   const env = makeWindow({ pixelId: '111' });
-  env.T.config.ga4Id = 'G-TEST';
+  env.T.config.gtmId = 'GTM-TEST';
   env.T.grantConsent({ analytics: true, ads: false });
   const a = loadAnalytics(env);
   a.track('restaurant_page_view', {});
@@ -470,15 +472,25 @@ const pixelConfigured = !!(cfgPixel && cfgPixel[1]);
 check('политиката не твърди „нищо не е включено“, щом пиксел има',
   pixelConfigured ? !/Към момента — никоя/.test(privacy) : true);
 check('Meta е описана като конфигурирана',
-  !pixelConfigured || /единствената конфигурирана/.test(privacy));
+  !pixelConfigured || /<b>Meta Pixel<\/b>[^<]*\(Meta Platforms Ireland Limited\) — конфигурирана услуга/.test(privacy));
 check('описано е кога се зарежда — след съгласие',
   !pixelConfigured || /само след като изберете/.test(privacy));
 check('изброени са бисквитките поименно',
   !pixelConfigured || (/_fbp/.test(privacy) && /_fbc/.test(privacy)));
 check('казано е какво НЕ се изпраща',
   !pixelConfigured || /Не<\/b> се изпращат име, телефон, имейл/.test(privacy));
-check('GA4 и Google Ads са отбелязани като още неконфигурирани',
-  /още не са конфигурирани/.test(privacy));
+/* GA4 вече е конфигуриран и политиката трябва да го описва поименно,
+   със същата точност като Meta. Google Ads още не е — и това също
+   трябва да е записано, за да не обещава страницата повече от
+   истината в никоя от двете посоки. */
+check('Google Tag Manager е описан поименно', /Google Tag Manager/.test(privacy));
+check('казано е, че контейнерът сам не задава бисквитки',
+  /не задава бисквитки/.test(privacy));
+check('GA4 е описан като конфигуриран', /<b>Google Analytics 4<\/b>[^<]*\(Google Ireland Limited\) — конфигурирана услуга/.test(privacy));
+check('изброени са аналитичните бисквитки поименно',
+  /_ga<\/code>/.test(privacy) && /_ga_\*/.test(privacy));
+check('Google Ads е отбелязан като още неконфигуриран',
+  /още не е конфигуриран/.test(privacy));
 check('оттеглянето на съгласие е описано',
   /оттегля по всяко време/.test(privacy));
 

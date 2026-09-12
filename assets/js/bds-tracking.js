@@ -2,28 +2,44 @@
    BDS — Конфигурация и зареждане на маркетинговите тагове
    ------------------------------------------------------------
    ЕДИНСТВЕНОТО място, където се въвеждат ID-та. Празен низ значи
-   „не е конфигурирано“ — тогава НИЩО не се зарежда и няма нито
-   една външна заявка. Никъде няма placeholder ID.
+   „не е конфигурирано“. Никъде няма placeholder ID.
 
-   ⚠ ДВЕ УСЛОВИЯ, за да тръгне таг:
-      1. попълнено ID тук;
-      2. дадено съгласие (виж БЛОКЕР по-долу).
+   ⚠ РЕДЪТ НА ЗАРЕЖДАНЕ Е ЧАСТ ОТ ДОГОВОРА.
+   Този файл се зарежда СИНХРОННО в <head>, НАД снипета на Google
+   Tag Manager. Причината е една: `gtag('consent', 'default', …)`
+   по-долу трябва да е в dataLayer ПРЕДИ контейнерът да тръгне.
+   Сложи ли се под него, контейнерът стартира без ограничение и
+   съгласието вече не значи нищо. Не го мести в края на <body> и
+   не му слагай defer.
 
-   ⚠ БЛОКЕР ПРЕДИ РЕКЛАМА: сайтът НЯМА банер за съгласие. Google
-   Consent Mode е инициализиран със стойност „denied“, както
-   изисква ЕС. Докато няма банер, който да извика
-   `BDSTracking.grantConsent(...)`, рекламните тагове НЯМА да се
-   заредят — и това е правилното поведение, не пропуск.
+   ⚠ КОЙ КАКВО ЗАРЕЖДА:
+      · GTM контейнерът — от HTML, със снипета във всяка страница.
+        Оттам се управляват GA4 и Google Ads. Отделен gtag.js
+        loader НЯМА и не бива да се добавя: две независими GA4
+        инсталации удвояват всяко събитие.
+      · Meta Pixel — оттук, и то само при съгласие за реклама.
+        Пикселът НЕ е в контейнера (виж metaViaGtm).
+
+   ⚠ Съгласието остава единственият ключ. До избора на посетителя
+   всички категории са `denied`, контейнерът не задава нито една
+   аналитична или рекламна бисквитка, а Meta изобщо не се зарежда.
    ============================================================ */
 (function (global) {
   'use strict';
 
   var CONFIG = {
-    /* Google Tag Manager — контейнерът, който управлява останалите. */
-    gtmId: '',              /* GTM-XXXXXXX */
+    /* Google Tag Manager — контейнерът, който управлява останалите.
+       Снипетът във всяка страница носи същия ID: генераторът
+       tools/build-pages.mjs го чете ОТТУК и го записва в HTML-а,
+       за да няма как двете места да се разминат. */
+    gtmId: 'GTM-W4PX4KPR',
 
-    /* Ползват се само ако таговете НЕ минават през GTM. */
-    ga4Id: '',              /* G-XXXXXXXXXX */
+    /* GA4 — таг ВЪТРЕ в контейнера, не втори loader тук. Стойността
+       стои записана, за да има едно място, което казва кой поток се
+       пълни, и за да могат тестовете да го проверят. */
+    ga4Id: 'G-K3GKSLPE1N',
+
+    /* Конверсиите на Google Ads още нямат ID и етикет. */
     adsConversionId: '',    /* AW-XXXXXXXXX */
     adsLeadLabel: '',       /* етикетът на lead конверсията */
 
@@ -34,6 +50,12 @@
        Въпреки че е попълнен, пикселът не се зарежда, докато посетителят
        не даде съгласие за реклама. Виж loadMetaPixel(). */
     metaPixelId: '1666581461701404',
+
+    /* Влиза ли Meta Pixel в GTM контейнера? Докато е false, пикселът
+       се зарежда оттук. Вдигни го на true САМО след като пикселът
+       наистина е добавен като таг в контейнера — иначе Meta спира да
+       получава каквото и да било. */
+    metaViaGtm: false,
 
     /* Включва подробен изход в конзолата. В production остава false. */
     debug: false
@@ -99,32 +121,18 @@
   var googleLoaded = false;
   var metaLoaded = false;
 
-  function loadScript(src) {
-    var s = document.createElement('script');
-    s.async = true;
-    s.src = src;
-    document.head.appendChild(s);
-    return s;
-  }
+  /** Google. Контейнерът вече е на страницата — оттук не се тегли
+      скрипт. Отключването е `consent update`-ът, който grantConsent()
+      изпраща непосредствено преди това извикване. Затова флагът значи
+      „Google таговете са отключени“, а не „скриптът е изтеглен“.
 
-  /** GA4 / Google Ads / GTM. Иска съгласие за анализ ИЛИ за реклама. */
+      Тук нарочно НЯМА gtag.js loader: редом с GTM той прави втора,
+      независима GA4 инсталация и удвоява всяко събитие. */
   function loadGoogleTags() {
     if (googleLoaded) return;
-
-    if (CONFIG.gtmId) {
-      /* GTM се зарежда сам и оттам нататък управлява GA4, Ads и Meta. */
-      loadScript('https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(CONFIG.gtmId));
-      global.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
-      googleLoaded = true;
-    } else if (CONFIG.ga4Id || CONFIG.adsConversionId) {
-      var first = CONFIG.ga4Id || CONFIG.adsConversionId;
-      loadScript('https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(first));
-      gtag('js', new Date());
-      if (CONFIG.ga4Id) gtag('config', CONFIG.ga4Id);
-      if (CONFIG.adsConversionId) gtag('config', CONFIG.adsConversionId);
-      global.gtag = global.gtag || gtag;
-      googleLoaded = true;
-    }
+    if (!CONFIG.gtmId) return;
+    global.gtag = global.gtag || gtag;
+    googleLoaded = true;
   }
 
   /** Meta Pixel. Иска съгласие за РЕКЛАМА — анализът не го отключва.
@@ -132,8 +140,11 @@
   function loadMetaPixel() {
     if (metaLoaded) return;
     if (!CONFIG.metaPixelId) return;
-    /* Ако Meta минава през GTM, не се зарежда втори път оттук. */
-    if (CONFIG.gtmId) return;
+    /* Оттук пикселът се зарежда, ДОКАТО не е добавен в контейнера.
+       Условието е metaViaGtm, а не gtmId: наличието на контейнер не
+       значи, че пикселът е вътре в него. Обратното изключваше Meta в
+       мига, в който GTM получи ID. */
+    if (CONFIG.metaViaGtm) return;
 
     /* eslint-disable */
     !function (f, b, e, v, n, t, s) {
