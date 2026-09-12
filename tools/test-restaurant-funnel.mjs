@@ -317,11 +317,21 @@ async function browserTests(base) {
         });
       } catch {}
     });
-    /* трайно записва събитията, за да преживеят пренасочването */
+    /* Трайно записва събитията, за да преживеят пренасочването.
+
+       Записват се ДВАТА възможни маршрута, не само единият:
+         · `{event:'име', …}`      — нормалният push, който GTM чака;
+         · `gtag('event','име',…)` — arguments обект, който GTM СЪЩО
+           брои за събитие.
+       Първата версия виждаше само първия. Затова „точно веднъж“
+       минаваше зелено, докато в GA4 влизаха по две копия: вторият
+       маршрут беше невидим за проверката, не за Google. */
     await p.send('Page.addScriptToEvaluateOnNewDocument', {
       source: `(function(){window.dataLayer=window.dataLayer||[];var _p=window.dataLayer.push.bind(window.dataLayer);
         window.dataLayer.push=function(){try{var r=JSON.parse(localStorage.getItem('${KEY}')||'[]');
-        for(var i=0;i<arguments.length;i++){var a=arguments[i];if(a&&a.event)r.push(a);}
+        for(var i=0;i<arguments.length;i++){var a=arguments[i];
+          if(a&&a.event)r.push({event:a.event,via:'push'});
+          else if(a&&typeof a==='object'&&a[0]==='event'&&a[1])r.push({event:a[1],via:'gtag'});}
         localStorage.setItem('${KEY}',JSON.stringify(r));}catch(e){}return _p.apply(null,arguments);};})();`,
     });
     try { await fn(p, () => errs, () => posts, KEY, () => crmPosts); } finally { p.close(); }
@@ -329,6 +339,8 @@ async function browserTests(base) {
 
   const go = async (p, url, wait = 2200) => { await p.send('Page.navigate', { url }); await sleep(wait); };
   const EVENTS = (k) => "JSON.stringify(JSON.parse(localStorage.getItem('" + k + "')||'[]').map(x=>x.event))";
+  /* Пълните записи, с маршрута. */
+  const EVENTS_VIA = (k) => "localStorage.getItem('" + k + "')||'[]'";
   const SNAP = 'JSON.stringify(window.BDSAttribution ? window.BDSAttribution.snapshot() : null)';
   const FILL = `(function(){var f=document.getElementById('restaurantForm');
     function s(n,v){var e=f.elements[n];if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));}
@@ -366,6 +378,14 @@ async function browserTests(base) {
     await sleep(700);
     check('празна форма не праща заявка', posts().length === 0);
 
+    /* Истинско писане през браузъра, не dispatchEvent: кодът нарочно
+       отхвърля isTrusted:false, за да не брои фокус, сложен от скрипт.
+       Само така restaurant_form_start се пали както при жив посетител
+       и влиза в измерването по-долу. */
+    await p.eval("document.getElementById('restaurantForm').elements['full_name'].focus()");
+    await sleep(200);
+    await p.send('Input.insertText', { text: 'QA' });
+    await sleep(400);
     await p.eval(FILL);
     await p.eval("(function(){var b=document.querySelector('#restaurantForm [type=submit]')||document.querySelector('#restaurantForm button');b.click();b.click();})()");
     await sleep(2600);
@@ -380,8 +400,21 @@ async function browserTests(base) {
     }
     await sleep(1200);
     const ev = JSON.parse(await p.eval(EVENTS(KEY)) || '[]');
-    check('generate_lead точно веднъж', ev.filter(e => e === 'generate_lead').length === 1,
-      ev.filter(e => e === 'generate_lead').length + ' | записани: ' + ev.join(','));
+    const rec = JSON.parse(await p.eval(EVENTS_VIA(KEY)) || '[]');
+    const once = (name) => ev.filter(e => e === name).length;
+    check('generate_lead точно веднъж', once('generate_lead') === 1,
+      once('generate_lead') + ' | записани: ' + ev.join(','));
+    /* Цялата верига от едно изпращане. Всяко от тези събития беше по
+       две в GA4, докато track() буташе и по втория маршрут. */
+    check('restaurant_form_start точно веднъж', once('restaurant_form_start') === 1,
+      once('restaurant_form_start') + ' | ' + ev.join(','));
+    check('restaurant_form_submit точно веднъж', once('restaurant_form_submit') === 1,
+      once('restaurant_form_submit') + ' | ' + ev.join(','));
+    check('restaurant_thank_you_view точно веднъж', once('restaurant_thank_you_view') === 1,
+      once('restaurant_thank_you_view') + ' | ' + ev.join(','));
+    const viaGtag = rec.filter(x => x.via === 'gtag');
+    check('нито едно събитие не минава по втори маршрут',
+      viaGtag.length === 0, viaGtag.map(x => x.event).join(', '));
     check('пренасочва към Thank You', /thank-you/.test(await p.eval('location.pathname')));
     check('Thank You показва референцията', /BDS-\d{4}-/.test(await p.eval("(document.querySelector('#leadRef')||{}).textContent||''")));
     check('Thank You е noindex', /noindex/.test(await p.eval("(document.querySelector('meta[name=robots]')||{}).content||''")));

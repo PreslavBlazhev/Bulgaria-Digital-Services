@@ -131,7 +131,12 @@
   function loadGoogleTags() {
     if (googleLoaded) return;
     if (!CONFIG.gtmId) return;
-    global.gtag = global.gtag || gtag;
+    /* `window.gtag` НЕ се публикува. Вътрешният gtag() бута в
+       dataLayer и служи само на consent командите. Изложен глобално,
+       той изглежда като истинския gtag и кани всеки да прати събитие
+       през него — а GTM брои и това за събитие. Точно така се появиха
+       двойните custom events. Събитията минават през
+       BDSAnalytics.track(), който бута ЕДИН път. */
     googleLoaded = true;
   }
 

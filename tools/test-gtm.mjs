@@ -174,6 +174,21 @@ check('има wait_for_update, за да не тръгнат таговете п
 check('при избор се изпраща consent update',
   /gtag\('consent', 'update', consentState\)/.test(tracking));
 
+/* ---------- Един маршрут към GA4 ----------
+   track() бута ЕДНО нещо в dataLayer. Всяко второ бутане на същото
+   събитие — независимо дали като обект или като gtag команда — GTM
+   брои отделно и в GA4 влизат по две копия. */
+/* Коментарите се махат: те описват точно този дефект и биха
+   провалили проверката, която обясняват. */
+const appSrc = read('assets/js/app.js').replace(/\/\*[\s\S]*?\*\//g, '');
+check('app.js не праща събития и през gtag()',
+  !/window\.gtag\(\s*'event'/.test(appSrc) && !/gtag\(\s*'event'/.test(appSrc));
+check('app.js бута в dataLayer точно на едно място',
+  (appSrc.match(/dataLayer\.push\(/g) || []).length === 1,
+  (appSrc.match(/dataLayer\.push\(/g) || []).length + ' места');
+check('bds-tracking.js не публикува window.gtag',
+  !/global\.gtag\s*=/.test(tracking));
+
 /* Контейнерът идва от HTML. Ако някой го върне и тук, страницата ще
    зареди два контейнера — затова се проверява изрично. */
 check('bds-tracking.js НЕ тегли втори контейнер', !tracking.includes('gtm.js?id='));
@@ -319,15 +334,36 @@ async function browserTests() {
   async function open() {
     const p = await newPage(chrome.port);
     const urls = [];
+    /* Броят на заявките НЕ е броят на събитията: GA4 пакетира няколко
+       събития в едно POST тяло, по едно на ред. Дублиране, преброено
+       по заявки, се скрива вътре в пакета. */
+    const gaEvents = [];
     p.on((m) => {
-      if (m.method === 'Network.requestWillBeSent') urls.push(m.params.request.url);
+      if (m.method !== 'Network.requestWillBeSent') return;
+      const r = m.params.request;
+      urls.push(r.url);
+      if (!/google-analytics|analytics\.google/.test(r.url)) return;
+      const q = new URL(r.url).searchParams.get('en');
+      if (q) gaEvents.push(q);
+      for (const mm of (r.postData || '').matchAll(/(?:^|&|\r?\n)en=([^&\r\n]*)/g)) gaEvents.push(mm[1]);
     });
     await p.send('Page.enable'); await p.send('Runtime.enable'); await p.send('Network.enable');
     /* Бисквитките са на ниво браузър, не на таб: без това остатък от
        предишна сесия с дадено съгласие обвинява следващата. */
     await p.send('Network.clearBrowserCookies');
-    return { p, urls };
+    return { p, urls, gaEvents };
   }
+
+  /** Колко пъти името е влязло в dataLayer — по двата възможни начина. */
+  const DL_COUNT = (name) => `(function(){
+    var dl = window.dataLayer || [], named = 0, viaGtag = 0;
+    for (var i = 0; i < dl.length; i++) {
+      var x = dl[i];
+      if (x && x.event === ${JSON.stringify(name)}) named++;
+      else if (x && typeof x === 'object' && x[0] === 'event' && x[1] === ${JSON.stringify(name)}) viaGtag++;
+    }
+    return JSON.stringify({ named: named, viaGtag: viaGtag });
+  })()`;
   const go = async (p, url, wait = 6000) => { await p.send('Page.navigate', { url }); await sleep(wait); };
 
   try {
@@ -419,42 +455,77 @@ async function browserTests() {
 
     /* ---------- Презареждане с дадено съгласие ---------- */
     G('Живо — презареждане с дадено съгласие');
-    b.urls.length = 0;
+    b.urls.length = 0; b.gaEvents.length = 0;
     await go(b.p, base + '/restaurants');
     net = classify(b.urls);
-    const pageViews = net.collect.filter((u) => param(u, 'en') === 'page_view');
+    /* Името на събитието се чете от gaEvents, не от адреса: при дадено
+       съгласие GA4 праща POST и `en` живее в тялото, не в query-то. */
+    const pageViews = b.gaEvents.filter((e) => e === 'page_view');
     check('точно един контейнер на зареждане', net.container.length === 1, net.container.length + ' бр.');
     check('точно един Google Tag на зареждане', net.googleTag.length === 1, net.googleTag.length + ' бр.');
     check('точно един page_view към GA4, не два',
-      pageViews.length === 1, pageViews.length + ' бр.');
+      pageViews.length === 1, pageViews.length + ' бр. | ' + JSON.stringify(b.gaEvents));
     check('page_view-ът е с granted съгласие',
-      pageViews.every((u) => param(u, 'gcs') === 'G111'),
-      pageViews.map((u) => param(u, 'gcs')).join(', '));
+      net.collect.length > 0 && net.collect.every((u) => param(u, 'gcs') === 'G111'),
+      net.collect.map((u) => param(u, 'gcs')).join(', '));
     check('page_view-ът е към официалния поток',
-      pageViews.every((u) => param(u, 'tid') === GA4_ID),
-      pageViews.map((u) => param(u, 'tid')).join(', '));
+      net.collect.length > 0 && net.collect.every((u) => param(u, 'tid') === GA4_ID),
+      net.collect.map((u) => param(u, 'tid')).join(', '));
     check('Meta Pixel се зарежда и след презареждане', net.meta.length > 0, net.meta.length + ' заявки');
 
-    /* ---------- Собствените събития на сайта ---------- */
-    G('Живо — събитията на сайта');
-    b.urls.length = 0;
+    /* ---------- Едно действие → едно събитие ----------
+       Регресията, заради която този блок съществува: track() буташе и
+       по втори маршрут (gtag команда), GTM броеше и двете и в GA4
+       влизаха по две копия на всяко custom събитие. Затова тук се
+       брои на трите нива поотделно — dataLayer, мрежа, име. */
+    G('Живо — едно действие, едно събитие');
+    b.urls.length = 0; b.gaEvents.length = 0;
     const tel = await b.p.eval("(function(){var a=document.querySelector('a[href^=\"tel:\"]');if(!a)return '';a.click();return a.getAttribute('href')})()");
-    await sleep(3500);
-    net = classify(b.urls);
-    const dl = JSON.parse(await b.p.eval("JSON.stringify(window.dataLayer.filter(function(x){return x&&x.event}).map(function(x){return x.event}))"));
-    check('кликът по телефон стига до dataLayer като phone_click',
-      dl.includes('phone_click'), tel + ' → ' + dl.join(', '));
-    /* Това НЕ е провал на сайта: събитието е в dataLayer точно както
-       GTM го очаква. Липсва отсрещната страна — GA4 Event таг с Custom
-       Event trigger в контейнера. Затова е блокирано, не счупено. */
-    const reached = net.collect.some((u) => param(u, 'en') === 'phone_click');
-    if (reached) {
-      check('phone_click стига до GA4', true);
-    } else {
-      blocked('собствените събития стигат до GA4',
-        'MANUAL — dataLayer ги носи, но в контейнера няма GA4 Event таг + Custom Event trigger за тях');
-    }
+    await sleep(5000);
+    let dl = JSON.parse(await b.p.eval(DL_COUNT('phone_click')));
+    check('един клик → едно dataLayer събитие', dl.named === 1, JSON.stringify(dl) + ' ' + tel);
+    check('един клик → нула събития по втори маршрут', dl.viaGtag === 0, JSON.stringify(dl));
+    check('при granted: точно едно GA4 събитие phone_click',
+      b.gaEvents.filter((e) => e === 'phone_click').length === 1,
+      JSON.stringify(b.gaEvents));
+
+    b.urls.length = 0; b.gaEvents.length = 0;
+    await b.p.eval("(function(){var a=document.querySelector('a[href^=\"mailto:\"]');if(a)a.click();return !!a})()");
+    await sleep(5000);
+    dl = JSON.parse(await b.p.eval(DL_COUNT('email_click')));
+    check('email_click също е един път в dataLayer', dl.named === 1 && dl.viaGtag === 0, JSON.stringify(dl));
+    check('при granted: точно едно GA4 събитие email_click',
+      b.gaEvents.filter((e) => e === 'email_click').length === 1,
+      JSON.stringify(b.gaEvents));
     b.p.close();
+
+    /* ---------- Същото действие при отказ ---------- */
+    G('Живо — едно действие при отказано съгласие');
+    const d = await open();
+    await go(d.p, base + '/restaurants', 1500);
+    await d.p.eval('try{localStorage.clear()}catch(e){}');
+    /* localStorage е общ за origin-а между табовете: първото зареждане
+       тук още помни съгласието от предишната сесия и вече е сложило
+       _ga и _fbp. Чистят се СЛЕД него, иначе проверката по-долу мери
+       чужди следи и обвинява отказа за тях. */
+    await d.p.send('Network.clearBrowserCookies');
+    await go(d.p, base + '/restaurants');
+    await d.p.eval("document.querySelector('[data-consent=\"reject\"]').click()");
+    await sleep(2000);
+    d.urls.length = 0; d.gaEvents.length = 0;
+    await d.p.eval("(function(){var a=document.querySelector('a[href^=\"tel:\"]');if(a)a.click();return !!a})()");
+    await sleep(5000);
+    dl = JSON.parse(await d.p.eval(DL_COUNT('phone_click')));
+    /* dataLayer се пълни винаги — гейтът е в GTM, не в сайта. Така
+       събитието е налично за тагове, които нямат нужда от съгласие. */
+    check('отказ: събитието пак влиза в dataLayer веднъж',
+      dl.named === 1 && dl.viaGtag === 0, JSON.stringify(dl));
+    check('отказ: нула GA4 custom събития',
+      d.gaEvents.filter((e) => e === 'phone_click' || e === 'email_click').length === 0,
+      JSON.stringify(d.gaEvents));
+    check('отказ: нула аналитични бисквитки след действието',
+      !AD_COOKIES.test(await d.p.eval('document.cookie') || ''), await d.p.eval('document.cookie') || 'няма');
+    d.p.close();
   } finally {
     srv.server.close();
     try { chrome.proc.kill(); } catch {}
