@@ -22,3 +22,11 @@ Desktop.ini
 .DS_Store
 *.bak
 *.tmp
+
+# ---- Node / Next.js (archive/next-site-prototype) ----
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*

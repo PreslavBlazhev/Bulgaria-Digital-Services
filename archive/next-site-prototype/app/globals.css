@@ -1,0 +1,295 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   BDS DESIGN TOKENS
+   Midnight Blue foundation, Electric Blue precision accent.
+   Everything downstream reads these — change here, change everywhere.
+   ========================================================================== */
+
+@theme {
+  /* --- Surfaces -------------------------------------------------------- */
+  --color-bg: #08111f;
+  --color-bg-alt: #101b2d;
+  --color-surface: #121f33;
+  --color-surface-raised: #16243b;
+  --color-surface-sunken: #0b1626;
+
+  /* --- Lines ----------------------------------------------------------- */
+  --color-line: #22324a;
+  --color-line-strong: #2e4160;
+  --color-line-soft: #1a2941;
+
+  /* --- Content --------------------------------------------------------- */
+  --color-fg: #f8fafc;
+  --color-fg-muted: #a8b3c7;
+  --color-fg-subtle: #6f7d94;
+
+  /* --- Electric Blue --------------------------------------------------- */
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2f74e6;
+  --color-primary-soft: #1d3a68;
+  --color-accent: #60a5fa;
+
+  /* --- Signal ---------------------------------------------------------- */
+  --color-signal-ok: #34d399;
+  --color-signal-warn: #fbbf24;
+  --color-signal-down: #f87171;
+
+  /* --- Type ------------------------------------------------------------ */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-mono-jb), ui-monospace, "SFMono-Regular", monospace;
+
+  /* --- Radius ---------------------------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+
+  /* --- Elevation ------------------------------------------------------- */
+  --shadow-panel: 0 1px 0 0 rgb(255 255 255 / 0.03) inset, 0 18px 40px -24px rgb(0 0 0 / 0.9);
+  --shadow-raised: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 28px 60px -32px rgb(0 0 0 / 0.95);
+  --shadow-glow: 0 0 0 1px rgb(59 130 246 / 0.35), 0 0 32px -8px rgb(59 130 246 / 0.45);
+
+  /* --- Motion ---------------------------------------------------------- */
+  --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+/* Semantic aliases — themeable surface for future palettes. */
+:root {
+  --background: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-elevated: var(--color-surface-raised);
+  --border: var(--color-line);
+  --foreground: var(--color-fg);
+  --muted: var(--color-fg-muted);
+  --primary: var(--color-primary);
+  --primary-hover: var(--color-primary-hover);
+  --radius: var(--radius-lg);
+  --shadow: var(--shadow-panel);
+
+  --header-h: 68px;
+
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Anchor targets clear the sticky header. */
+    scroll-padding-top: calc(var(--header-h) + 24px);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: rgb(59 130 246 / 0.32);
+    color: var(--color-fg);
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border: 3px solid var(--color-bg);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-line-strong);
+  }
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Very low-opacity engineering grid. Never the loudest thing on screen. */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(34 50 74 / 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(34 50 74 / 0.35) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+@utility bg-grid-sm {
+  background-image:
+    linear-gradient(to right, rgb(34 50 74 / 0.28) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(34 50 74 / 0.28) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Hairline separator that fades at both ends. */
+@utility rule-fade {
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-line-strong) 18%,
+    var(--color-line-strong) 82%,
+    transparent
+  );
+}
+
+@utility text-gradient-blue {
+  background: linear-gradient(120deg, #f8fafc 12%, #60a5fa 58%, #3b82f6 96%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Uppercase technical eyebrow used across sections. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+@utility panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+}
+
+/* Masks long scroll rails at the edges instead of hard-cutting them. */
+@utility mask-fade-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 40px,
+    black calc(100% - 40px),
+    transparent
+  );
+}
+
+/* ==========================================================================
+   MOTION PRIMITIVES
+   CSS-only so they work in Server Components with zero JS.
+   ========================================================================== */
+
+@keyframes bds-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bds-pulse-node {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes bds-dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes bds-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+.animate-fade-up {
+  animation: bds-fade-up 0.7s var(--ease-out-quart) both;
+}
+
+.animate-pulse-node {
+  animation: bds-pulse-node 3.2s ease-in-out infinite;
+}
+
+.animate-dash {
+  stroke-dasharray: 4 10;
+  animation: bds-dash 22s linear infinite;
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   Strip animation, never layout. Everything stays legible and functional.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-fade-up,
+  .animate-pulse-node {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

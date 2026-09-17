@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulgaria Digital Services — Клиентски въпросник</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#1e3a8a;
+  --accent-mid:#2563eb;
+  --accent-light:#3b82f6;
+  --accent-pale:#eff6ff;
+  --white:#ffffff;
+  --surface:#f1f5f9;
+  --text:#0f172a;
+  --text-muted:#64748b;
+  --border:#e2e8f0;
+  --error:#dc2626;
+  --success:#059669;
+  --radius:12px;
+  --radius-sm:8px;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--surface);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* ── HEADER ── */
+.header{background:var(--accent);color:#fff;padding:14px 20px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.header-inner{max-width:700px;margin:0 auto}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.logo-mark{width:32px;height:32px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:20px;height:20px}
+.logo-text{font-size:1.05rem;font-weight:700;letter-spacing:-.3px}
+.logo-text span{color:#93c5fd}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.progress-label{font-size:.78rem;opacity:.85;font-weight:500}
+.progress-pct{font-size:.78rem;opacity:.7}
+.progress-track{background:rgba(255,255,255,.2);border-radius:999px;height:5px;overflow:hidden}
+.progress-fill{background:#93c5fd;height:100%;border-radius:999px;transition:width .35s ease}
+
+/* ── MAIN ── */
+.main{max-width:700px;margin:0 auto;padding:24px 16px 110px}
+.section{display:none}.section.active{display:block}
+
+.section-header{margin-bottom:20px}
+.section-chip{display:inline-block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent-light);background:var(--accent-pale);padding:3px 10px;border-radius:999px;margin-bottom:8px}
+.section-title{font-size:1.45rem;font-weight:800;color:var(--text);line-height:1.2}
+.section-desc{font-size:.88rem;color:var(--text-muted);margin-top:5px}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04);margin-bottom:14px}
+
+hr.divider{border:none;border-top:1.5px solid var(--border);margin:18px 0}
+
+/* ── FIELDS ── */
+.field{margin-bottom:18px}
+.field:last-child{margin-bottom:0}
+label.field-label{display:block;font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:6px}
+.req{color:var(--error);margin-left:2px}
+.opt{color:var(--text-muted);font-weight:400;font-size:.78rem;margin-left:4px}
+.hint{font-size:.78rem;color:var(--text-muted);margin-top:5px;line-height:1.4}
+.hint a{color:var(--accent-light)}
+.field-error{font-size:.78rem;color:var(--error);margin-top:4px;display:none}
+.field-error.show{display:block}
+
+input[type=text],input[type=email],input[type=tel],input[type=url],input[type=number],select,textarea{
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:.95rem;color:var(--text);background:var(--white);
+  transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none;font-family:inherit
+}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent-light);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+input.err,select.err,textarea.err{border-color:var(--error)}
+textarea{resize:vertical;min-height:90px}
+
+/* ── TOGGLES (radio/checkbox as pills) ── */
+.pill-group{display:flex;flex-wrap:wrap;gap:8px}
+.pill-group label{display:flex;align-items:center;gap:7px;font-size:.88rem;font-weight:500;cursor:pointer;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--white);transition:border-color .15s,background .15s,color .15s;user-select:none;line-height:1.2}
+.pill-group input[type=radio],.pill-group input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);flex-shrink:0}
+.pill-group label:has(input:checked){border-color:var(--accent-light);background:var(--accent-pale);color:var(--accent);font-weight:600}
+
+/* ── HOURS GRID ── */
+.hours-grid{display:flex;flex-direction:column;gap:6px}
+.hours-row{display:grid;grid-template-columns:80px 1fr 16px 1fr auto;gap:6px;align-items:center}
+.hours-row .day-name{font-size:.82rem;font-weight:600;color:var(--text-muted)}
+.hours-row input[type=time]{padding:8px 10px;font-size:.85rem}
+.hours-sep{font-size:.78rem;color:var(--text-muted);text-align:center}
+.closed-wrap{display:flex;align-items:center;gap:5px;font-size:.78rem;color:var(--text-muted);white-space:nowrap;cursor:pointer}
+.closed-wrap input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer}
+
+/* ── MULTI URL inputs ── */
+.url-stack{display:flex;flex-direction:column;gap:7px}
+
+/* ── NAV FOOTER ── */
+.nav-footer{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1.5px solid var(--border);padding:10px 16px;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,.07)}
+.nav-inner{max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.btn{padding:11px 18px;border:none;border-radius:var(--radius-sm);font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;font-family:inherit;line-height:1;min-width:82px}
+.btn:active{transform:scale(.97)}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-mid)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{background:#047857}
+.nav-info{text-align:center;font-size:.78rem;color:var(--text-muted);line-height:1.35;flex:1}
+.nav-info strong{font-size:.85rem;color:var(--text)}
+
+/* ── SUBMIT AREA ── */
+.submit-area{padding:20px 0 4px;text-align:center}
+.submit-note{font-size:.8rem;color:var(--text-muted);margin-bottom:14px;line-height:1.5}
+.submit-note strong{color:var(--text)}
+.submit-btns{display:flex;flex-direction:column;gap:10px}
+.btn-full{width:100%;padding:15px;font-size:1rem;border-radius:var(--radius-sm);font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:background .15s,transform .1s}
+.btn-full:active{transform:scale(.98)}
+.btn-submit{background:var(--accent);color:#fff}
+.btn-submit:hover{background:var(--accent-mid)}
+.btn-save{background:var(--white);color:var(--accent);border:1.5px solid var(--accent-light);font-size:.88rem;padding:11px}
+
+/* ── SPINNER ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.88);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.overlay.show{display:flex}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── THANK YOU ── */
+#thankYou{display:none;max-width:700px;margin:40px auto;padding:24px 16px}
+.ty-card{background:var(--white);border-radius:var(--radius);padding:48px 28px;box-shadow:0 4px 24px rgba(0,0,0,.09);text-align:center}
+.ty-icon{width:68px;height:68px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.8rem}
+.ty-card h2{font-size:1.7rem;font-weight:800;margin-bottom:10px}
+.ty-card p{color:var(--text-muted);margin-bottom:24px;font-size:.95rem}
+.btn-dl{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:var(--accent-pale);color:var(--accent);border:1.5px solid var(--accent-light);border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:.9rem;font-family:inherit;transition:background .15s}
+.btn-dl:hover{background:#dbeafe}
+
+/* ── DRAFT TOAST ── */
+.draft-saved{position:fixed;bottom:74px;right:16px;background:var(--success);color:#fff;font-size:.72rem;font-weight:600;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:150}
+.draft-saved.show{opacity:1}
+
+@media(max-width:480px){
+  .hours-row{grid-template-columns:68px 1fr 10px 1fr auto;gap:4px}
+  .section-title{font-size:1.25rem}
+  .ty-card{padding:36px 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="draft-saved" id="draftSaved">Запазено</div>
+
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <p style="font-size:.88rem;color:var(--text-muted)">Изпращане…</p>
+</div>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="7" height="7" rx="1.5" fill="#1e3a8a"/>
+          <rect x="11" y="2" width="7" height="7" rx="1.5" fill="#1e3a8a"/>
+          <rect x="2" y="11" width="7" height="7" rx="1.5" fill="#1e3a8a"/>
+          <rect x="11" y="11" width="7" height="7" rx="1.5" fill="#93c5fd"/>
+        </svg>
+      </div>
+      <div class="logo-text">Web<span>Forge</span> — Клиентски въпросник</div>
+    </div>
+    <div class="progress-meta">
+      <span class="progress-label" id="progressLabel">Секция 1 от 10</span>
+      <span class="progress-pct" id="progressPct">10%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:10%"></div>
+    </div>
+  </div>
+</header>
+
+<main class="main" id="formMain">
+<form id="intakeForm" novalidate>
+
+<!-- ══════════ SECTION 1 ══════════ -->
+<div class="section active" data-section="1">
+  <div class="section-header">
+    <div class="section-chip">Секция 1 от 10</div>
+    <h2 class="section-title">Основна информация</h2>
+    <p class="section-desc">Разкажете ни накратко за вашия бизнес.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="businessName">Име на бизнеса <span class="req">*</span></label>
+      <input type="text" id="businessName" name="businessName" placeholder="напр. Механа Златната Скара" required>
+      <div class="field-error" id="err-businessName">Моля, въведете името на бизнеса.</div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="businessType">Тип бизнес <span class="req">*</span></label>
+      <select id="businessType" name="businessType" required>
+        <option value="">— Изберете —</option>
+        <option value="restaurant">Ресторант / Механа</option>
+        <option value="tattoo">Тату студио</option>
+        <option value="barbershop">Барбершоп</option>
+        <option value="hairdresser">Фризьорски салон</option>
+        <option value="autoservice">Автосервиз</option>
+        <option value="cafe">Кафе / Заведение</option>
+        <option value="beauty">Козметичен салон</option>
+        <option value="nails">Нокти / Маникюр</option>
+        <option value="gym">Фитнес / Спорт</option>
+        <option value="other">Друго</option>
+      </select>
+      <div class="field-error" id="err-businessType">Моля, изберете тип бизнес.</div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="tagline">Слоган / Tagline <span class="opt">(по желание)</span></label>
+      <input type="text" id="tagline" name="tagline" placeholder="напр. Вкусът на традицията">
+    </div>
+    <div class="field">
+      <label class="field-label" for="shortDescription">Кратко описание <span class="opt">(едно изречение)</span></label>
+      <input type="text" id="shortDescription" name="shortDescription" placeholder="напр. Традиционна механа в центъра на Плевен с домашна кухня.">
+    </div>
+    <div class="field">
+      <label class="field-label" for="foundedYear">Година на основаване <span class="opt">(по желание)</span></label>
+      <input type="number" id="foundedYear" name="foundedYear" placeholder="напр. 2015" min="1900" max="2030">
+    </div>
+    <div class="field">
+      <label class="field-label">Език(ци) на сайта</label>
+      <div class="pill-group">
+        <label><input type="checkbox" name="siteLanguages" value="bg" checked> 🇧🇬 Български</label>
+        <label><input type="checkbox" name="siteLanguages" value="en"> 🇬🇧 Английски</label>
+        <label><input type="checkbox" name="siteLanguages" value="other"> Друг</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 2 ══════════ -->
+<div class="section" data-section="2">
+  <div class="section-header">
+    <div class="section-chip">Секция 2 от 10</div>
+    <h2 class="section-title">Брандинг и визия</h2>
+    <p class="section-desc">Помогнете ни да разберем естетиката на вашия бизнес.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label">Имате ли готово лого? <span class="req">*</span></label>
+      <div class="pill-group">
+        <label><input type="radio" name="hasLogo" value="yes"> Да</label>
+        <label><input type="radio" name="hasLogo" value="no"> Не</label>
+        <label><input type="radio" name="hasLogo" value="inprogress"> В процес</label>
+      </div>
+      <div class="field-error" id="err-hasLogo">Моля, изберете опция.</div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="logoLink">Линк към лого файловете <span class="opt">(Google Drive, WeTransfer…)</span></label>
+      <input type="url" id="logoLink" name="logoLink" placeholder="https://drive.google.com/...">
+      <p class="hint">Нямате линк? Изпратете файловете по-късно на pr2.blazhev@gmail.com</p>
+    </div>
+    <div class="field">
+      <label class="field-label" for="brandColors">Основни цветове на бранда</label>
+      <input type="text" id="brandColors" name="brandColors" placeholder="напр. #1A1A1A и #C9A84C (черно и златно)">
+    </div>
+    <div class="field">
+      <label class="field-label">Желан стил / усещане</label>
+      <div class="pill-group">
+        <label><input type="checkbox" name="brandStyle" value="modern"> Модерен</label>
+        <label><input type="checkbox" name="brandStyle" value="luxury"> Луксозен</label>
+        <label><input type="checkbox" name="brandStyle" value="minimal"> Минималистичен</label>
+        <label><input type="checkbox" name="brandStyle" value="playful"> Игрив</label>
+        <label><input type="checkbox" name="brandStyle" value="vintage"> Винтидж</label>
+        <label><input type="checkbox" name="brandStyle" value="elegant"> Елегантен</label>
+        <label><input type="checkbox" name="brandStyle" value="bold"> Смел / Ударен</label>
+        <label><input type="checkbox" name="brandStyle" value="cozy"> Уютен / Топъл</label>
+        <label><input type="checkbox" name="brandStyle" value="professional"> Професионален</label>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label">Сайтове, които ви харесват <span class="opt">(до 3 линка за вдъхновение)</span></label>
+      <div class="url-stack">
+        <input type="url" name="inspirationSite1" placeholder="https://...">
+        <input type="url" name="inspirationSite2" placeholder="https://...">
+        <input type="url" name="inspirationSite3" placeholder="https://...">
+      </div>
+      <p class="hint">Какво ви харесва на тях? Цветовете, структурата, стила? (незадължително — можете да го опишете в бележките)</p>
+    </div>
+    <div class="field">
+      <label class="field-label" for="dislikedSites">Стилове / сайтове, от които искате да се избягате <span class="opt">(по желание)</span></label>
+      <textarea id="dislikedSites" name="dislikedSites" rows="2" placeholder="Линкове или описание на нещата, от които искате да се разграничите…"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 3 ══════════ -->
+<div class="section" data-section="3">
+  <div class="section-header">
+    <div class="section-chip">Секция 3 от 10</div>
+    <h2 class="section-title">За нас / Съдържание</h2>
+    <p class="section-desc">Текстово съдържание — истории, хора, отличия.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="aboutText">История / Текст „За нас"</label>
+      <textarea id="aboutText" name="aboutText" rows="6" placeholder="Разкажете историята на бизнеса — кога е основан, от кого, какво го прави специален.&#10;&#10;Не е нужно да е завършен текст. Груби точки, бележки или дори копи-пейст от Facebook са напълно достатъчни — аз ще го оформя."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="uniqueSellingPoint">Какво ви отличава от конкуренцията?</label>
+      <textarea id="uniqueSellingPoint" name="uniqueSellingPoint" rows="4" placeholder="напр. Единствен барбершоп в Пловдив с walk-in без чакане. Само натурална козметика. 15 години опит в боята…"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="teamMembers">Екип <span class="opt">(релевантно за барбершоп, тату студио, салон)</span></label>
+      <textarea id="teamMembers" name="teamMembers" rows="4" placeholder="Изброете имена и роли:&#10;• Иван — майстор-бръснар, 8 г. опит&#10;• Мария — стилист, специалист по боя&#10;&#10;Снимки на екипа → Секция 8"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 4 ══════════ -->
+<div class="section" data-section="4">
+  <div class="section-header">
+    <div class="section-chip">Секция 4 от 10</div>
+    <h2 class="section-title">Услуги / Продукти / Ценоразпис</h2>
+    <p class="section-desc">Всичко, което предлагате — услуги, цени, категории.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="servicesList">Пълен списък услуги / продукти с цени</label>
+      <textarea id="servicesList" name="servicesList" rows="10" placeholder="Копирайте директно от ценоразпис, меню или Instagram:&#10;&#10;ПРИЧЕСКИ&#10;• Подстригване мъже — 20 лв.&#10;• Подстригване + брада — 30 лв.&#10;&#10;БРАДИ&#10;• Оформяне — 15 лв.&#10;• Бръснене с нож — 25 лв."></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label" for="serviceCategories">Категории на услугите <span class="opt">(по желание)</span></label>
+      <input type="text" id="serviceCategories" name="serviceCategories" placeholder="напр. Прически, Бради, Козметика, Лечения">
+    </div>
+    <div class="field">
+      <label class="field-label" for="promotions">Промоции, пакети или специални оферти <span class="opt">(по желание)</span></label>
+      <textarea id="promotions" name="promotions" rows="3" placeholder="напр. Пакет 'Мъж' — подстригване + брада + кафе за 40 лв."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 5 ══════════ -->
+<div class="section" data-section="5">
+  <div class="section-header">
+    <div class="section-chip">Секция 5 от 10</div>
+    <h2 class="section-title">Контакти и локация</h2>
+    <p class="section-desc">Как клиентите да ви намерят и се свържат с вас.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="phone1">Основен телефон <span class="req">*</span></label>
+      <input type="tel" id="phone1" name="phone1" placeholder="+359 88 888 8888" required>
+      <div class="field-error" id="err-phone1">Моля, въведете телефонен номер.</div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="phone2">Втори телефон <span class="opt">(по желание)</span></label>
+      <input type="tel" id="phone2" name="phone2" placeholder="+359 88 888 8888">
+    </div>
+    <div class="field">
+      <label class="field-label" for="contactEmail">Имейл за контакт <span class="req">*</span></label>
+      <input type="email" id="contactEmail" name="contactEmail" placeholder="info@example.com" required>
+      <div class="field-error" id="err-contactEmail">Моля, въведете валиден имейл адрес.</div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="address">Адрес</label>
+      <input type="text" id="address" name="address" placeholder="напр. ул. Иван Вазов 12, Плевен 5800">
+    </div>
+    <div class="field">
+      <label class="field-label" for="googleMapsLink">Google Maps линк <span class="opt">(по желание)</span></label>
+      <input type="url" id="googleMapsLink" name="googleMapsLink" placeholder="https://maps.google.com/...">
+      <p class="hint">Google Maps → намерете локацията → Сподели → Копирайте линка</p>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label">Работно време</label>
+      <div class="hours-grid">
+        <div class="hours-row">
+          <span class="day-name">Понеделник</span>
+          <input type="time" name="hoursMonFrom" value="09:00">
+          <span class="hours-sep">–</span>
+          <input type="time" name="hoursMonTo" value="18:00">
+          <label class="closed-wrap"><input type="checkbox" name="hoursMonClosed"> Затв.</label>
+        </div>
+        <div class="hours-row">
+          <span class="day-name">Вторник</span>
+          <input type="time" name="hoursTueFrom" value="09:00">
+          <span class="hours-sep">–</span>
+          <input type="time" name="hoursTueTo" value="18:00">
+          <label class="closed-wrap"><input type="checkbox" name="hoursTueClosed"> Затв.</label>
+        </div>
+        <div class="hours-row">
+          <span class="day-name">Сряда</span>
+          <input type="time" name="hoursWedFrom" value="09:00">
+          <span class="hours-sep">–</span>
+          <input type="time" name="hoursWedTo" value="18:00">
+          <label class="closed-wrap"><input type="checkbox" name="hoursWedClosed"> Затв.</label>
+        </div>
+        <div class="hours-row">
+          <span class="day-name">Четвъртък</span>
+          <input type="time" name="hoursThuFrom" value="09:00">
+          <span class="hours-sep">–</span>
+          <input type="time" name="hoursThuTo" value="18:00">
+          <label class="closed-wrap"><input type="checkbox" name="hoursThuClosed"> Затв.</label>
+        </div>
+        <div class="hours-row">
+          <span class="day-name">Петък</span>
+          <input type="time" name="hoursFriFrom" value="09:00">
+          <span class="hours-sep">–</span>
+          <input type="time" name="hoursFriTo" value="19:00">
+          <label class="closed-wrap"><input type="checkbox" name="hoursFriClosed"> Затв.</label>
+        </div>
+        <div class="hours-row">
+          <span class="day-name">Събота</span>
+          <input type="time" name="hoursSatFrom" value="10:00">
+          <span class="hours-sep">–</span>
+          <input type="time" name="hoursSatTo" value="16:00">
+          <label class="closed-wrap"><input type="checkbox" name="hoursSatClosed"> Затв.</label>
+        </div>
+        <div class="hours-row">
+          <span class="day-name">Неделя</span>
+          <input type="time" name="hoursSunFrom" value="10:00">
+          <span class="hours-sep">–</span>
+          <input type="time" name="hoursSunTo" value="14:00">
+          <label class="closed-wrap"><input type="checkbox" name="hoursSunClosed" checked> Затв.</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 6 ══════════ -->
+<div class="section" data-section="6">
+  <div class="section-header">
+    <div class="section-chip">Секция 6 от 10</div>
+    <h2 class="section-title">Социални мрежи и онлайн присъствие</h2>
+    <p class="section-desc">Линкове към профилите ви и съществуващи онлайн ресурси.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="instagram">Instagram</label>
+      <input type="url" id="instagram" name="instagram" placeholder="https://instagram.com/yourprofile">
+    </div>
+    <div class="field">
+      <label class="field-label" for="facebook">Facebook</label>
+      <input type="url" id="facebook" name="facebook" placeholder="https://facebook.com/yourpage">
+    </div>
+    <div class="field">
+      <label class="field-label" for="tiktok">TikTok</label>
+      <input type="url" id="tiktok" name="tiktok" placeholder="https://tiktok.com/@yourprofile">
+    </div>
+    <div class="field">
+      <label class="field-label" for="youtube">YouTube</label>
+      <input type="url" id="youtube" name="youtube" placeholder="https://youtube.com/@yourchannel">
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="existingWebsite">Съществуващ сайт / домейн <span class="opt">(ако има)</span></label>
+      <input type="url" id="existingWebsite" name="existingWebsite" placeholder="https://www.example.com">
+    </div>
+    <div class="field">
+      <label class="field-label">Имате ли Google Business профил?</label>
+      <div class="pill-group">
+        <label><input type="radio" name="hasGoogleBusiness" value="yes"> Да</label>
+        <label><input type="radio" name="hasGoogleBusiness" value="no"> Не</label>
+        <label><input type="radio" name="hasGoogleBusiness" value="unknown"> Не знам</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 7 ══════════ -->
+<div class="section" data-section="7">
+  <div class="section-header">
+    <div class="section-chip">Секция 7 от 10</div>
+    <h2 class="section-title">Функционалности на сайта</h2>
+    <p class="section-desc">Какво искате сайтът да умее и да съдържа.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label">Желани секции / функции</label>
+      <div class="pill-group">
+        <label><input type="checkbox" name="desiredSections" value="gallery"> 🖼️ Галерия</label>
+        <label><input type="checkbox" name="desiredSections" value="reviews"> ⭐ Отзиви</label>
+        <label><input type="checkbox" name="desiredSections" value="booking"> 📅 Резервации</label>
+        <label><input type="checkbox" name="desiredSections" value="contactForm"> 📩 Форма за контакт</label>
+        <label><input type="checkbox" name="desiredSections" value="menu"> 🍽️ Меню / Ценоразпис</label>
+        <label><input type="checkbox" name="desiredSections" value="blog"> 📝 Блог</label>
+        <label><input type="checkbox" name="desiredSections" value="map"> 📍 Карта</label>
+        <label><input type="checkbox" name="desiredSections" value="team"> 👥 Екип</label>
+        <label><input type="checkbox" name="desiredSections" value="faq"> ❓ FAQ</label>
+        <label><input type="checkbox" name="desiredSections" value="social"> 📱 Соцмрежи</label>
+        <label><input type="checkbox" name="desiredSections" value="portfolio"> 🎨 Портфолио / Работи</label>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label">Онлайн резервации?</label>
+      <div class="pill-group">
+        <label><input type="radio" name="onlineBooking" value="yes"> Да</label>
+        <label><input type="radio" name="onlineBooking" value="no"> Не</label>
+        <label><input type="radio" name="onlineBooking" value="maybe"> Може би</label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="bookingPlatform">Платформа за резервации <span class="opt">(ако вече ползвате)</span></label>
+      <input type="text" id="bookingPlatform" name="bookingPlatform" placeholder="напр. Fresha, Booksy, собствена система…">
+    </div>
+    <div class="field">
+      <label class="field-label" for="bookingDetails">Детайли за резервациите <span class="opt">(по желание)</span></label>
+      <textarea id="bookingDetails" name="bookingDetails" rows="2" placeholder="напр. Само за определени услуги, нужен е депозит, минимум 2 ч. напред…"></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="contactFormEmail">На кой имейл да идват запитванията от контактната форма?</label>
+      <input type="email" id="contactFormEmail" name="contactFormEmail" placeholder="info@example.com">
+      <p class="hint">Оставете празно, ако е същият като основния контактен имейл.</p>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label">Имате ли снимки за галерия?</label>
+      <div class="pill-group">
+        <label><input type="radio" name="hasPhotos" value="yes"> Да, имам</label>
+        <label><input type="radio" name="hasPhotos" value="partial"> Имам, но малко</label>
+        <label><input type="radio" name="hasPhotos" value="no"> Нямам</label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="photoCount">Приблизителен брой снимки <span class="opt">(по желание)</span></label>
+      <input type="text" id="photoCount" name="photoCount" placeholder="напр. 30–40 снимки">
+    </div>
+    <div class="field">
+      <label class="field-label">Отзиви — откъде ще дойдат?</label>
+      <div class="pill-group">
+        <label><input type="checkbox" name="reviewsSource" value="google"> Google Reviews</label>
+        <label><input type="checkbox" name="reviewsSource" value="facebook"> Facebook</label>
+        <label><input type="checkbox" name="reviewsSource" value="manual"> Ръчно подадени</label>
+        <label><input type="checkbox" name="reviewsSource" value="none"> Без отзиви</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 8 ══════════ -->
+<div class="section" data-section="8">
+  <div class="section-header">
+    <div class="section-chip">Секция 8 от 10</div>
+    <h2 class="section-title">Снимки и материали</h2>
+    <p class="section-desc">Визуалните материали, с които разполагате.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="photosLink">Линк към папка със снимки</label>
+      <input type="url" id="photosLink" name="photosLink" placeholder="https://drive.google.com/... или WeTransfer линк">
+      <p class="hint">Google Drive, WeTransfer, Dropbox — достатъчно е да споделите папката.</p>
+    </div>
+    <div class="field">
+      <label class="field-label">Какви снимки имате?</label>
+      <div class="pill-group">
+        <label><input type="checkbox" name="photoTypes" value="interior"> 🏠 Интериор</label>
+        <label><input type="checkbox" name="photoTypes" value="exterior"> 🏪 Екстериор</label>
+        <label><input type="checkbox" name="photoTypes" value="products"> 📦 Продукти</label>
+        <label><input type="checkbox" name="photoTypes" value="food"> 🍕 Храна / Напитки</label>
+        <label><input type="checkbox" name="photoTypes" value="team"> 👨‍💼 Екип</label>
+        <label><input type="checkbox" name="photoTypes" value="work"> ✂️ Работни снимки</label>
+        <label><input type="checkbox" name="photoTypes" value="branding"> 🎨 Лого / Брандинг</label>
+        <label><input type="checkbox" name="photoTypes" value="other"> Друго</label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Нужда от фотограф?</label>
+      <div class="pill-group">
+        <label><input type="radio" name="needsPhotographer" value="yes"> Да, имам нужда</label>
+        <label><input type="radio" name="needsPhotographer" value="no"> Не, имам снимки</label>
+        <label><input type="radio" name="needsPhotographer" value="maybe"> Може би</label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="photosNotes">Допълнителни бележки за снимките <span class="opt">(по желание)</span></label>
+      <textarea id="photosNotes" name="photosNotes" rows="2" placeholder="напр. Снимките са от 2022 г. Нямам снимки на екипа."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 9 ══════════ -->
+<div class="section" data-section="9">
+  <div class="section-header">
+    <div class="section-chip">Секция 9 от 10</div>
+    <h2 class="section-title">Домейн и хостинг</h2>
+    <p class="section-desc">Техническата страна — адресът на сайта.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="existingDomain">Съществуващ домейн <span class="opt">(ако имате)</span></label>
+      <input type="text" id="existingDomain" name="existingDomain" placeholder="напр. zlatnataskara.com">
+    </div>
+    <div class="field">
+      <label class="field-label" for="desiredDomain">Желан домейн <span class="opt">(ако нямате)</span></label>
+      <input type="text" id="desiredDomain" name="desiredDomain" placeholder="напр. barbershopivan.bg">
+    </div>
+    <div class="field">
+      <label class="field-label">Кой плаща домейна и хостинга?</label>
+      <div class="pill-group">
+        <label><input type="radio" name="domainPayer" value="client"> Аз (клиентът)</label>
+        <label><input type="radio" name="domainPayer" value="webforge"> Включено от Bulgaria Digital Services</label>
+        <label><input type="radio" name="domainPayer" value="discuss"> Ще уточним</label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Нужен ли е имейл на домейна?</label>
+      <div class="pill-group">
+        <label><input type="radio" name="needsDomainEmail" value="yes"> Да (напр. info@бизнесmi.com)</label>
+        <label><input type="radio" name="needsDomainEmail" value="no"> Не</label>
+        <label><input type="radio" name="needsDomainEmail" value="already"> Вече имам</label>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="domainEmailAddress">Желан имейл адрес <span class="opt">(по желание)</span></label>
+      <input type="text" id="domainEmailAddress" name="domainEmailAddress" placeholder="напр. info@, office@, rezervacii@">
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTION 10 ══════════ -->
+<div class="section" data-section="10">
+  <div class="section-header">
+    <div class="section-chip">Секция 10 от 10</div>
+    <h2 class="section-title">Проектни детайли</h2>
+    <p class="section-desc">Последни детайли за нашето сътрудничество.</p>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label class="field-label" for="deadline">Желан краен срок</label>
+      <input type="text" id="deadline" name="deadline" placeholder="напр. До края на месеца, или конкретна дата…">
+    </div>
+    <div class="field">
+      <label class="field-label" for="urgency">Ниво на спешност</label>
+      <select id="urgency" name="urgency">
+        <option value="">— Изберете —</option>
+        <option value="relaxed">Спокойно — имаме достатъчно време</option>
+        <option value="normal">Нормално — в рамките на месец-два</option>
+        <option value="soon">По-скоро скоро — имаме нужда бързо</option>
+        <option value="urgent">Спешно — нужен е колкото може по-скоро</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label" for="budget">Приблизителен бюджет <span class="opt">(ако не е фиксиран предварително)</span></label>
+      <input type="text" id="budget" name="budget" placeholder="напр. 500–800 лв., или 'отворен съм за оферта'">
+    </div>
+    <div class="field">
+      <label class="field-label" for="additionalNotes">Допълнителни бележки / специални изисквания</label>
+      <textarea id="additionalNotes" name="additionalNotes" rows="5" placeholder="Всичко, което смятате, че е важно и не сте споменали. Нямате ли нищо — оставете полето празно."></textarea>
+    </div>
+    <hr class="divider">
+    <div class="field">
+      <label class="field-label" for="clientName">Вашето име <span class="req">*</span></label>
+      <input type="text" id="clientName" name="clientName" placeholder="напр. Иван Петров" required>
+      <div class="field-error" id="err-clientName">Моля, въведете вашето име.</div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="clientEmail">Вашият имейл <span class="req">*</span></label>
+      <input type="email" id="clientEmail" name="clientEmail" placeholder="вашият@имейл.com" required>
+      <div class="field-error" id="err-clientEmail">Моля, въведете валиден имейл адрес.</div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="clientPhone">Вашият телефон <span class="opt">(по желание)</span></label>
+      <input type="tel" id="clientPhone" name="clientPhone" placeholder="+359 88 888 8888">
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <p class="submit-note">С натискане на „Изпрати" данните ще бъдат изпратени до <strong>pr2.blazhev@gmail.com</strong>. Ще получите отговор до 24 часа.</p>
+    <div class="submit-btns">
+      <button type="button" class="btn-full btn-submit" id="submitBtn">✓ &nbsp;Изпрати въпросника</button>
+      <button type="button" class="btn-full btn-save" id="saveJsonBtn">⬇ &nbsp;Свали като файл (без изпращане)</button>
+    </div>
+  </div>
+</div>
+
+</form>
+</main>
+
+<!-- NAV FOOTER -->
+<div class="nav-footer" id="navFooter">
+  <div class="nav-inner">
+    <button type="button" class="btn btn-ghost" id="prevBtn" style="visibility:hidden">← Назад</button>
+    <div class="nav-info" id="navInfo">
+      <strong>1 / 10</strong><br>Основна информация
+    </div>
+    <button type="button" class="btn btn-primary" id="nextBtn">Напред →</button>
+  </div>
+</div>
+
+<!-- THANK YOU -->
+<div id="thankYou">
+  <div class="ty-card">
+    <div class="ty-icon">✓</div>
+    <h2>Благодарим!</h2>
+    <p>Получихме вашата информация.<br>Ще се свържем с вас до 24 часа.</p>
+    <button class="btn-dl" id="downloadJsonBtn">⬇ &nbsp;Свали client.json</button>
+  </div>
+</div>
+
+<script>
+const TOTAL = 10;
+const TITLES = [
+  'Основна информация','Брандинг и визия','За нас / Съдържание',
+  'Услуги / Ценоразпис','Контакти и локация','Социални мрежи',
+  'Функционалности','Снимки и материали','Домейн и хостинг','Проектни детайли'
+];
+
+let cur = 1;
+let savedData = {};
+
+const $sections = document.querySelectorAll('.section');
+const $progressLabel = document.getElementById('progressLabel');
+const $progressPct   = document.getElementById('progressPct');
+const $progressFill  = document.getElementById('progressFill');
+const $prevBtn  = document.getElementById('prevBtn');
+const $nextBtn  = document.getElementById('nextBtn');
+const $navInfo  = document.getElementById('navInfo');
+const $navFooter = document.getElementById('navFooter');
+const $formMain  = document.getElementById('formMain');
+const $overlay   = document.getElementById('overlay');
+const $thankYou  = document.getElementById('thankYou');
+
+// ── NAVIGATION ──────────────────────────────────────
+function goTo(n) {
+  $sections.forEach(s => s.classList.remove('active'));
+  document.querySelector(`.section[data-section="${n}"]`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const pct = Math.round((n / TOTAL) * 100);
+  $progressFill.style.width = pct + '%';
+  $progressLabel.textContent = `Секция ${n} от ${TOTAL}`;
+  $progressPct.textContent = pct + '%';
+  $navInfo.innerHTML = `<strong>${n} / ${TOTAL}</strong><br>${TITLES[n - 1]}`;
+
+  $prevBtn.style.visibility = n === 1 ? 'hidden' : 'visible';
+  $nextBtn.style.display = n === TOTAL ? 'none' : '';
+}
+
+$prevBtn.addEventListener('click', () => { if (cur > 1) goTo(--cur); });
+$nextBtn.addEventListener('click', () => {
+  if (!validate(cur)) return;
+  if (cur < TOTAL) goTo(++cur);
+});
+
+// ── VALIDATION ──────────────────────────────────────
+const RULES = {
+  1: [
+    { id: 'businessName', err: 'err-businessName', ok: v => v.trim() !== '' },
+    { id: 'businessType', err: 'err-businessType', ok: v => v !== '' },
+  ],
+  2: [
+    { radio: 'hasLogo', err: 'err-hasLogo' },
+  ],
+  5: [
+    { id: 'phone1',       err: 'err-phone1',       ok: v => v.trim() !== '' },
+    { id: 'contactEmail', err: 'err-contactEmail',  ok: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+  ],
+  10: [
+    { id: 'clientName',  err: 'err-clientName',  ok: v => v.trim() !== '' },
+    { id: 'clientEmail', err: 'err-clientEmail', ok: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+  ]
+};
+
+function validate(n) {
+  const rules = RULES[n];
+  if (!rules) return true;
+  let pass = true;
+  rules.forEach(r => {
+    let ok;
+    if (r.radio) {
+      ok = !!document.querySelector(`input[name="${r.radio}"]:checked`);
+    } else {
+      const el = document.getElementById(r.id);
+      ok = r.ok(el.value);
+      el.classList.toggle('err', !ok);
+    }
+    const errEl = document.getElementById(r.err);
+    if (errEl) errEl.classList.toggle('show', !ok);
+    if (!ok) pass = false;
+  });
+  return pass;
+}
+
+// Clear err on change
+document.querySelectorAll('input,select,textarea').forEach(el => {
+  el.addEventListener('input', () => {
+    el.classList.remove('err');
+    const e = document.getElementById('err-' + el.id);
+    if (e) e.classList.remove('show');
+    saveDraft();
+  });
+  el.addEventListener('change', saveDraft);
+});
+
+// Closed checkbox dims time inputs
+document.querySelectorAll('.closed-wrap input[type=checkbox]').forEach(cb => {
+  cb.addEventListener('change', () => {
+    const row = cb.closest('.hours-row');
+    row.querySelectorAll('input[type=time]').forEach(t => {
+      t.disabled = cb.checked;
+      t.style.opacity = cb.checked ? '.35' : '1';
+    });
+  });
+});
+
+// ── COLLECT DATA ──────────────────────────────────────
+function v(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function checks(name) { return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(e => e.value); }
+function radio(name) { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; }
+function qv(sel) { const el = document.querySelector(sel); return el ? el.value : ''; }
+
+function collectData() {
+  const days = [
+    ['Mon','monday'],['Tue','tuesday'],['Wed','wednesday'],['Thu','thursday'],
+    ['Fri','friday'],['Sat','saturday'],['Sun','sunday']
+  ];
+  const workingHours = {};
+  days.forEach(([code, name]) => {
+    const closed = document.querySelector(`input[name="hours${code}Closed"]`);
+    if (closed && closed.checked) {
+      workingHours[name] = 'Затворено';
+    } else {
+      const from = qv(`input[name="hours${code}From"]`);
+      const to   = qv(`input[name="hours${code}To"]`);
+      workingHours[name] = (from && to) ? `${from} – ${to}` : '';
+    }
+  });
+
+  return {
+    // Section 1
+    businessName:       v('businessName'),
+    businessType:       v('businessType'),
+    tagline:            v('tagline'),
+    shortDescription:   v('shortDescription'),
+    foundedYear:        v('foundedYear'),
+    siteLanguages:      checks('siteLanguages'),
+    // Section 2
+    hasLogo:            radio('hasLogo'),
+    logoLink:           v('logoLink'),
+    brandColors:        v('brandColors'),
+    brandStyle:         checks('brandStyle'),
+    inspirationSites:   [qv('input[name=inspirationSite1]'), qv('input[name=inspirationSite2]'), qv('input[name=inspirationSite3]')].filter(Boolean),
+    dislikedSites:      v('dislikedSites'),
+    // Section 3
+    aboutText:          v('aboutText'),
+    uniqueSellingPoint: v('uniqueSellingPoint'),
+    teamMembers:        v('teamMembers'),
+    // Section 4
+    servicesList:       v('servicesList'),
+    serviceCategories:  v('serviceCategories'),
+    promotions:         v('promotions'),
+    // Section 5
+    phone1:             v('phone1'),
+    phone2:             v('phone2'),
+    contactEmail:       v('contactEmail'),
+    address:            v('address'),
+    googleMapsLink:     v('googleMapsLink'),
+    workingHours,
+    // Section 6
+    instagram:          v('instagram'),
+    facebook:           v('facebook'),
+    tiktok:             v('tiktok'),
+    youtube:            v('youtube'),
+    existingWebsite:    v('existingWebsite'),
+    hasGoogleBusiness:  radio('hasGoogleBusiness'),
+    // Section 7
+    desiredSections:    checks('desiredSections'),
+    onlineBooking:      radio('onlineBooking'),
+    bookingPlatform:    v('bookingPlatform'),
+    bookingDetails:     v('bookingDetails'),
+    contactFormEmail:   v('contactFormEmail'),
+    hasPhotos:          radio('hasPhotos'),
+    photoCount:         v('photoCount'),
+    reviewsSource:      checks('reviewsSource'),
+    // Section 8
+    photosLink:         v('photosLink'),
+    photoTypes:         checks('photoTypes'),
+    needsPhotographer:  radio('needsPhotographer'),
+    photosNotes:        v('photosNotes'),
+    // Section 9
+    existingDomain:     v('existingDomain'),
+    desiredDomain:      v('desiredDomain'),
+    domainPayer:        radio('domainPayer'),
+    needsDomainEmail:   radio('needsDomainEmail'),
+    domainEmailAddress: v('domainEmailAddress'),
+    // Section 10
+    deadline:           v('deadline'),
+    urgency:            v('urgency'),
+    budget:             v('budget'),
+    additionalNotes:    v('additionalNotes'),
+    clientName:         v('clientName'),
+    clientEmail:        v('clientEmail'),
+    clientPhone:        v('clientPhone'),
+    // Meta
+    _submittedAt:       new Date().toISOString(),
+    _formVersion:       '1.0'
+  };
+}
+
+// ── SUBMIT ──────────────────────────────────────────
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  if (!validate(10)) return;
+  const data = collectData();
+  savedData = data;
+
+  const flat = {
+    _subject: `BULGARIA DIGITAL SERVICES INTAKE — ${data.businessName || 'нов клиент'}`,
+    _template: 'table',
+    _captcha: 'false',
+    businessName:       data.businessName,
+    businessType:       data.businessType,
+    tagline:            data.tagline,
+    shortDescription:   data.shortDescription,
+    foundedYear:        data.foundedYear,
+    siteLanguages:      data.siteLanguages.join(', '),
+    hasLogo:            data.hasLogo,
+    logoLink:           data.logoLink,
+    brandColors:        data.brandColors,
+    brandStyle:         data.brandStyle.join(', '),
+    inspirationSites:   data.inspirationSites.join(' | '),
+    dislikedSites:      data.dislikedSites,
+    aboutText:          data.aboutText,
+    uniqueSellingPoint: data.uniqueSellingPoint,
+    teamMembers:        data.teamMembers,
+    servicesList:       data.servicesList,
+    serviceCategories:  data.serviceCategories,
+    promotions:         data.promotions,
+    phone1:             data.phone1,
+    phone2:             data.phone2,
+    contactEmail:       data.contactEmail,
+    address:            data.address,
+    googleMapsLink:     data.googleMapsLink,
+    hours_Monday:       data.workingHours.monday,
+    hours_Tuesday:      data.workingHours.tuesday,
+    hours_Wednesday:    data.workingHours.wednesday,
+    hours_Thursday:     data.workingHours.thursday,
+    hours_Friday:       data.workingHours.friday,
+    hours_Saturday:     data.workingHours.saturday,
+    hours_Sunday:       data.workingHours.sunday,
+    instagram:          data.instagram,
+    facebook:           data.facebook,
+    tiktok:             data.tiktok,
+    youtube:            data.youtube,
+    existingWebsite:    data.existingWebsite,
+    hasGoogleBusiness:  data.hasGoogleBusiness,
+    desiredSections:    data.desiredSections.join(', '),
+    onlineBooking:      data.onlineBooking,
+    bookingPlatform:    data.bookingPlatform,
+    bookingDetails:     data.bookingDetails,
+    contactFormEmail:   data.contactFormEmail,
+    hasPhotos:          data.hasPhotos,
+    photoCount:         data.photoCount,
+    reviewsSource:      data.reviewsSource.join(', '),
+    photosLink:         data.photosLink,
+    photoTypes:         data.photoTypes.join(', '),
+    needsPhotographer:  data.needsPhotographer,
+    photosNotes:        data.photosNotes,
+    existingDomain:     data.existingDomain,
+    desiredDomain:      data.desiredDomain,
+    domainPayer:        data.domainPayer,
+    needsDomainEmail:   data.needsDomainEmail,
+    domainEmailAddress: data.domainEmailAddress,
+    deadline:           data.deadline,
+    urgency:            data.urgency,
+    budget:             data.budget,
+    additionalNotes:    data.additionalNotes,
+    clientName:         data.clientName,
+    clientEmail:        data.clientEmail,
+    clientPhone:        data.clientPhone,
+  };
+
+  $overlay.classList.add('show');
+
+  try {
+    const res = await fetch('https://formsubmit.co/ajax/pr2.blazhev@gmail.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(flat)
+    });
+    const result = await res.json();
+    $overlay.classList.remove('show');
+
+    if (result.success === 'true' || result.success === true) {
+      showThankYou();
+    } else {
+      alert('Нещо се обърка. Моля, опитайте отново.');
+    }
+  } catch {
+    $overlay.classList.remove('show');
+    alert('Грешка при изпращане. Моля, свалете JSON файла и го изпратете на pr2.blazhev@gmail.com');
+    downloadJson(data);
+  }
+});
+
+// ── THANK YOU ───────────────────────────────────────
+function showThankYou() {
+  clearDraft();
+  $formMain.style.display = 'none';
+  $navFooter.style.display = 'none';
+  $thankYou.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── JSON DOWNLOAD ────────────────────────────────────
+function downloadJson(data) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const slug = (data.businessName || 'client').replace(/\s+/g, '_').replace(/[^\wÀ-ɏЀ-ӿ]/g, '');
+  a.href = url;
+  a.download = `bulgaria_digital_services_${slug || 'intake'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('saveJsonBtn').addEventListener('click', () => {
+  downloadJson(collectData());
+});
+
+document.getElementById('downloadJsonBtn').addEventListener('click', () => {
+  downloadJson(savedData);
+});
+
+// ── AUTO-SAVE ────────────────────────────────────────
+const STORAGE_KEY = 'webforge_intake_v1';
+
+function saveDraft() {
+  const cbGroups = {};
+  const data = {};
+  document.querySelectorAll('input,select,textarea').forEach(el => {
+    if (!el.name) return;
+    if (el.type === 'checkbox') {
+      (cbGroups[el.name] = cbGroups[el.name] || []).push(el);
+    } else if (el.type === 'radio') {
+      if (el.checked) data[el.name] = el.value;
+    } else {
+      data[el.name] = el.value;
+    }
+  });
+  Object.entries(cbGroups).forEach(([name, els]) => {
+    data[name] = els.length === 1 ? els[0].checked : els.filter(e => e.checked).map(e => e.value);
+  });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+  flashDraft();
+}
+
+function loadDraft() {
+  let data;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    data = JSON.parse(raw);
+  } catch { return; }
+  const cbGroups = {};
+  document.querySelectorAll('input,select,textarea').forEach(el => {
+    if (!el.name || !(el.name in data)) return;
+    if (el.type === 'checkbox') {
+      (cbGroups[el.name] = cbGroups[el.name] || []).push(el);
+    } else if (el.type === 'radio') {
+      el.checked = data[el.name] === el.value;
+    } else {
+      el.value = data[el.name] ?? '';
+    }
+  });
+  Object.entries(cbGroups).forEach(([name, els]) => {
+    if (!(name in data)) return;
+    if (els.length === 1) {
+      els[0].checked = !!data[name];
+      if (els[0].checked && name.endsWith('Closed')) {
+        const row = els[0].closest('.hours-row');
+        if (row) row.querySelectorAll('input[type=time]').forEach(t => { t.disabled = true; t.style.opacity = '.35'; });
+      }
+    } else {
+      const vals = Array.isArray(data[name]) ? data[name] : [];
+      els.forEach(e => { e.checked = vals.includes(e.value); });
+    }
+  });
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+}
+
+let _draftTimer;
+function flashDraft() {
+  const el = document.getElementById('draftSaved');
+  el.classList.add('show');
+  clearTimeout(_draftTimer);
+  _draftTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ── INIT ─────────────────────────────────────────────
+loadDraft();
+goTo(1);
+</script>
+</body>
+</html>

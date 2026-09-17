@@ -1,0 +1,192 @@
+BDS MARKETING ROADMAP — АКТУАЛЕН CHECKLIST
+Актуализиран: 11.09.2026
+
+Легенда:
+[x] потвърдено готово
+[ ] остава да се направи или потвърди на живо
+
+============================================================
+1. ПОТВЪРДЕНО ГОТОВО ОТ ПОСЛЕДНИТЕ ФАЗИ
+============================================================
+
+[x] Публичната идентичност е Bulgaria Digital Services (BDS).
+[x] Официалният домейн е bulgaria-digital-services.com.
+[x] Фирменият имейл е info@bulgaria-digital-services.com.
+[x] Google Workspace организацията Bulgaria Digital Services е създадена.
+[x] Meta Business Suite за Bulgaria Digital Services е създаден.
+[x] Facebook страницата и Instagram профилът са свързани в Meta Business Suite.
+[x] Instagram профилът е верифициран.
+[x] Фаза 8 — цени и оферти: изградена.
+[x] Фаза 11 — lead attribution: изградена.
+[x] Фаза 13 — negative keywords: подготвени.
+[x] Фаза 16 — CRM: изграден и тестван.
+[x] Фаза 17 — proposal workflow: изграден и тестван.
+[x] Фаза 18 — marketing tracker: изграден и тестван.
+[x] Фаза 20 — CRM ↔ marketing closed loop: изграден и тестван.
+[x] Google Ads restaurant campaign структурата и рекламните текстове са подготвени.
+[x] Локалните QA проверки са минали без технически грешки.
+
+============================================================
+2. ОСТАВА, ЗА ДА ЗАТВОРИМ ФАЗИ 7–22
+============================================================
+
+ФАЗА 7 — LIVE IDENTITY И ДОВЕРИЕ
+
+[ ] Потвърди, че последният dist/production build е качен на официалния домейн.
+[ ] Провери HTTPS, canonical URL, sitemap.xml и robots.txt на production.
+[ ] Стартирай production identity теста:
+    node tools/test-identity.mjs --production
+[ ] Потвърди, че сайтът показва само актуалния домейн, имейл и телефон.
+[ ] Потвърди, че няма останали личен Gmail, netlify.app или старото име WebForge.
+
+ФАЗА 9 — LEAD ФОРМА НА ЖИВО
+
+[ ] Активирай FormSubmit чрез една истинска тестова заявка.
+[ ] Потвърди activation имейла, получен на info@bulgaria-digital-services.com.
+[ ] Изпрати втори тестов lead от restaurant landing страницата.
+[ ] Провери, че lead-ът пристига по имейл.
+[ ] Провери, че същият lead влиза в CRM само веднъж.
+[ ] Провери Thank You страницата и пазенето на source/UTM данните.
+
+ФАЗА 10 — GOOGLE TRACKING
+
+[ ] Завърши последната onboarding стъпка в Google Workspace.
+[ ] Направи тест: изпращане и получаване през info@bulgaria-digital-services.com.
+[ ] Създай/потвърди GA4 property за официалния домейн.
+[ ] Създай/потвърди Google Tag Manager container.
+[ ] Свържи сайта с Google Search Console и потвърди собствеността на домейна.
+[ ] Създай/потвърди Google Ads акаунт за BDS.
+[ ] Добави реалните GA4, GTM и Google Ads ID-та в production настройките.
+[ ] Провери събитията: form start, form submit, generate_lead, phone click и email click.
+[ ] Провери consent banner-а преди активиране на рекламни cookies.
+
+ФАЗИ 12–13 — GOOGLE ADS, БЕЗ ДА СТАРТИРАМЕ КАМПАНИЯТА
+
+[ ] Импортирай подготвената restaurant campaign структура в Google Ads.
+[ ] Импортирай подготвените negative keywords.
+[ ] Смени старите URL адреси в кампанията с официалния restaurant landing URL.
+[ ] Задай географско насочване за Варна и избрания обслужван район.
+[ ] Настрой дневен лимит, но остави кампанията PAUSED.
+[ ] Потвърди, че primary conversion е само generate_lead.
+[ ] Не стартирай рекламата преди финалния checklist от Фаза 30.
+
+ФАЗИ 14–15 — PRODUCTION И РЕАЛЕН ТЕЛЕФОН
+
+[ ] Провери restaurant landing страницата с Lighthouse/PageSpeed на production.
+[ ] Провери за 404, счупени бутони, console errors и бавни изображения.
+[ ] Тествай на реален Android телефон.
+[ ] Тествай mobile меню, CTA, формата, телефонните и email линковете.
+[ ] Потвърди, че няма horizontal scroll и че Thank You страницата работи.
+
+ФАЗА 19 — РЕКЛАМНИ ДАННИ КЪМ TRACKER-А
+
+[ ] Свържи Google Ads с marketing tracker-а.
+[ ] Потвърди Meta ad account и достъпа ти като администратор.
+[ ] Добави/потвърди payment method в Google Ads и Meta Ads.
+[ ] Свържи Meta Ads с marketing tracker-а.
+[ ] Смени/защити BDS_OPS_TOKEN и обнови свързаните настройки.
+[ ] Потвърди, че daily import записва spend, impressions, clicks и conversions.
+[ ] Не приемай празните таблици за проблем преди да има реално похарчени средства.
+
+ФАЗА 21 — META PIXEL И RETARGETING
+
+[ ] Създай или потвърди Meta Pixel/Dataset за BDS.
+[ ] Свържи Pixel/Dataset с правилния Meta ad account.
+[ ] Потвърди домейна bulgaria-digital-services.com в Meta.
+[ ] Добави Pixel ID към production сайта.
+[ ] Провери PageView, ViewContent, Lead/FormSubmit и Contact events.
+[ ] Създай audience за всички посетители на сайта.
+[ ] Създай audience за посетители на restaurant landing страницата.
+[ ] Създай audience за започнали, но неизпратили формата.
+[ ] Изключи вече получените leads от retargeting аудиторията.
+
+ФАЗА 22 — СОЦИАЛНИ ПРОФИЛИ
+
+[x] Meta Business Suite съществува.
+[x] Facebook и Instagram са свързани.
+[x] Instagram е верифициран.
+[ ] Провери линка към официалния сайт и фирмения имейл и в двата профила.
+[ ] Попълни услугите и контактната информация във Facebook страницата.
+[ ] Публикувай поне 5–6 качествени BDS публикации преди реклама.
+[ ] Включи поне един restaurant system demo.
+[ ] Включи Pizza Pazzo case study само с реални и потвърдени данни.
+[ ] Подготви поне едно кратко demo Reel/video.
+[ ] Потвърди, че профилите не изглеждат празни преди платения трафик.
+
+============================================================
+3. ФИНАЛЕН GATE ЗА ЗАТВАРЯНЕ НА ФАЗА 22
+============================================================
+
+[ ] Последният build е на официалния домейн.
+[ ] Фирменият имейл изпраща и получава.
+[ ] Формата изпраща email и създава CRM lead.
+[ ] GA4, GTM и Google Ads conversion tracking работят.
+[ ] Meta Pixel/Dataset получава правилните events.
+[ ] Google Ads и Meta ad accounts са потвърдени и свързани.
+[ ] Marketing tracker import-ите са конфигурирани.
+[ ] Mobile production тестът е минал.
+[ ] Facebook и Instagram имат достатъчно реално съдържание.
+[ ] Pizza Pazzo е достатъчно стабилна за реален case study и демонстрация.
+[ ] Пълен end-to-end тест минава без грешка:
+    Landing page → Form → Thank You → Conversion → CRM → Email → Attribution → Proposal → Won → Revenue → Tracker.
+
+Когато всички точки в този блок са [x], фази 7–22 са затворени.
+
+============================================================
+4. СЛЕДВАЩИ ФАЗИ 23–30
+============================================================
+
+Важно: практическата последователност е 23 → 24 → 30 → 25 → 26 → 27 → 28 → 29.
+Фаза 30 се изпълнява преди първия похарчен евро, въпреки номера си.
+
+ФАЗА 23 — ORGANIC CONTENT
+
+[ ] Публикувай case study, system demo, FAQ, pricing explanation и кратки видеа.
+[ ] Изгради малък запас от съдържание за поне 2 седмици.
+
+ФАЗА 24 — ПЪЛЕН END-TO-END ТЕСТ
+
+[ ] Изиграй целия път като реален клиент от рекламата до CRM и офертата.
+[ ] Поправи всеки проблем преди пускането на кампанията.
+
+ФАЗА 30 — ПРОВЕРКА ПРЕДИ ПЪРВИЯ €1
+
+[ ] Потвърди офертата, case study-то, tracking-а, CRM, follow-up процеса и budget limit-а.
+[ ] Дай GO само ако няма блокираща точка.
+
+ФАЗА 25 — ПЪРВИТЕ 30 РЕКЛАМНИ ДНИ
+
+[ ] Стартирай приблизително с €10/ден и максимум около €300 за първите 30 дни.
+[ ] Преглеждай Search Terms и качеството на leads.
+[ ] Прави една контролирана оптимизация седмично.
+
+ФАЗА 26 — KPI
+
+[ ] Следи spend, leads, qualified leads, CPL, proposals, clients, CAC, revenue и ROAS.
+[ ] Не оценявай кампанията по likes, followers или евтини кликове.
+
+ФАЗА 27 — ОЦЕНКА НА КАЧЕСТВОТО
+
+[ ] Провери дали leads са релевантни, отговарят, имат бюджет и стигат до оферта.
+[ ] Потвърди дали реално се затварят клиенти.
+
+ФАЗА 28 — NO-SCALE GATE
+
+[ ] Не увеличавай бюджета при счупен tracking, нерелевантни leads или неизвестен CAC.
+[ ] Не увеличавай бюджета, ако CRM и follow-up процесът не се поддържат.
+
+ФАЗА 29 — SCALING
+
+[ ] Започни scaling само след няколко затворени сделки и измерими CPL, close rate, CAC и ROAS.
+[ ] Увеличавай постепенно: €10/ден → €15/ден → €20/ден.
+[ ] Спирай увеличението, ако качеството или икономиката се влошат.
+
+============================================================
+5. НАЙ-БЛИЗКИТЕ 5 ДЕЙСТВИЯ
+============================================================
+
+[ ] 1. Довърши Google Workspace и тествай info@ имейла.
+[ ] 2. Потвърди последния production deploy и стартирай identity теста.
+[ ] 3. Активирай FormSubmit и провери email + CRM lead.
+[ ] 4. Създай/потвърди GA4, GTM, Search Console и Google Ads.
+[ ] 5. После довърши Meta ad account, Pixel/Dataset и domain verification.

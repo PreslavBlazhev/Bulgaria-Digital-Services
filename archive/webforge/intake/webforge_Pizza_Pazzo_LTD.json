@@ -1,0 +1,80 @@
+{
+  "businessName": "Pizza Pazzo LTD",
+  "businessType": "other",
+  "tagline": "Няма",
+  "shortDescription": "Pizza Delivery",
+  "foundedYear": "2012",
+  "siteLanguages": [
+    "bg",
+    "en"
+  ],
+  "hasLogo": "yes",
+  "logoLink": "",
+  "brandColors": "Бяло Зелено Червено",
+  "brandStyle": [
+    "minimal",
+    "elegant"
+  ],
+  "inspirationSites": [],
+  "dislikedSites": "",
+  "aboutText": "",
+  "uniqueSellingPoint": "",
+  "teamMembers": "",
+  "servicesList": "Менюто но",
+  "serviceCategories": "Доставка на пици",
+  "promotions": "Има",
+  "phone1": "+359801999",
+  "phone2": "+359882484777",
+  "contactEmail": "youshirtme@gmail.com",
+  "address": "Ul Dimitar Konstantinov 35",
+  "googleMapsLink": "",
+  "workingHours": {
+    "monday": "11:00 – 22:30",
+    "tuesday": "09:00 – 18:00",
+    "wednesday": "09:00 – 18:00",
+    "thursday": "09:00 – 18:00",
+    "friday": "09:00 – 19:00",
+    "saturday": "10:00 – 16:00",
+    "sunday": "Затворено"
+  },
+  "instagram": "",
+  "facebook": "",
+  "tiktok": "",
+  "youtube": "",
+  "existingWebsite": "www.pizzapazzo.bg",
+  "hasGoogleBusiness": "yes",
+  "desiredSections": [
+    "gallery",
+    "reviews"
+  ],
+  "onlineBooking": "no",
+  "bookingPlatform": "",
+  "bookingDetails": "",
+  "contactFormEmail": "",
+  "hasPhotos": "yes",
+  "photoCount": "100",
+  "reviewsSource": [
+    "google",
+    "facebook"
+  ],
+  "photosLink": "",
+  "photoTypes": [
+    "food"
+  ],
+  "needsPhotographer": "no",
+  "photosNotes": "",
+  "existingDomain": "www.pizzaoazzo.bh",
+  "desiredDomain": "",
+  "domainPayer": "client",
+  "needsDomainEmail": "yes",
+  "domainEmailAddress": "orderspp@gmail.com",
+  "deadline": "",
+  "urgency": "relaxed",
+  "budget": "",
+  "additionalNotes": "",
+  "clientName": "Пламен Първанов",
+  "clientEmail": "youshirtme@gmail.com",
+  "clientPhone": "+359882484777",
+  "_submittedAt": "2026-07-09T10:35:57.423Z",
+  "_formVersion": "1.0"
+}

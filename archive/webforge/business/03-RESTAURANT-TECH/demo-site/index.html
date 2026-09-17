@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Собствена система за онлайн поръчки за ресторанти</title>
+  <meta name="description" content="Клиентът поръчва от вашия сайт, поръчката влиза при вас със статус и време, а в кухнята излиза бон. Меню, количка, checkout, профили, админ панел и отчети — без комисиона към платформа." />
+  <meta name="theme-color" content="#c1462f" />
+  <!-- Страницата НЕ е предвидена за индексиране, докато няма решение
+       за публичния бранд (D8) и за домейна. Виж 01-90-day-niche-focus.md -->
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/demo.css" />
+</head>
+<body>
+
+  <header class="hdr">
+    <div class="container hdr__inner">
+      <span class="hdr__brand">Restaurant <span>Ordering System</span></span>
+      <nav class="hdr__nav" aria-label="Основна навигация">
+        <a href="#problem">Проблемът</a>
+        <a href="#flow">Как работи</a>
+        <a href="#scope">Какво включва</a>
+        <a href="#fit">За кого е</a>
+        <a href="#faq">Въпроси</a>
+      </nav>
+      <a href="#cta" class="btn btn--primary btn--sm">Заяви демонстрация</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container">
+        <span class="hero__badge">За ресторанти и пицарии с доставка</span>
+        <h1>Собствена система за онлайн поръчки.</h1>
+        <p class="hero__lead">
+          Клиентът поръчва от <b>вашия</b> сайт. Поръчката влиза при вас със
+          статус и време за изпълнение. В кухнята излиза бон на принтера.
+          Менюто и цените обновявате сами, без да чакате разработчик.
+        </p>
+        <div class="hero__actions">
+          <a href="#cta" class="btn btn--primary">Заяви демонстрация на живо</a>
+          <a href="#flow" class="btn btn--ghost">Виж как работи ↓</a>
+        </div>
+        <p class="hero__note">
+          Системата е изградена и работи за реална пицария. Не е шаблон и не е конструктор.
+        </p>
+      </div>
+    </section>
+
+    <!-- ПРОБЛЕМ -->
+    <section class="section section--alt" id="problem">
+      <div class="container">
+        <div class="section__head">
+          <p class="section__kicker">Днешният процес</p>
+          <h2 class="section__title">Къде се губят поръчки</h2>
+          <p class="section__lead">Ако поне три от тези важат за вас, системата има какво да реши. Ако не важи нито едно — кажете ми и няма да ви губя времето.</p>
+        </div>
+
+        <div class="problems">
+          <div class="problem"><span class="problem__mark">1</span><p><b>Телефонът е зает</b>В пиков час всеки зает сигнал е поръчка, която отива другаде.</p></div>
+          <div class="problem"><span class="problem__mark">2</span><p><b>Грешки при записване</b>Грешен адрес, забравена добавка, объркан размер — на ръка се случва.</p></div>
+          <div class="problem"><span class="problem__mark">3</span><p><b>Комисиона на всяка поръчка</b>Плащате процент и за клиентите, които и без това знаят за вас.</p></div>
+          <div class="problem"><span class="problem__mark">4</span><p><b>Менюто се обновява трудно</b>Всяка промяна на цена минава през външен човек.</p></div>
+          <div class="problem"><span class="problem__mark">5</span><p><b>Клиентът е на платформата</b>Не знаете кой е повторен клиент и няма как да се свържете с него.</p></div>
+          <div class="problem"><span class="problem__mark">6</span><p><b>Клиентът звъни „къде е поръчката“</b>Няма статус, който да види сам.</p></div>
+          <div class="problem"><span class="problem__mark">7</span><p><b>Кухнята преписва на ръка</b>Между екрана и тигана се губи информация.</p></div>
+          <div class="problem"><span class="problem__mark">8</span><p><b>Няма отчети</b>Не знаете кое се продава, кога и в какъв обем.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW -->
+    <section class="section" id="flow">
+      <div class="container">
+        <div class="section__head">
+          <p class="section__kicker">End-to-end</p>
+          <h2 class="section__title">От клиента до отчета — шест стъпки</h2>
+          <p class="section__lead">Целият път на една поръчка, без нито едно ръчно преписване.</p>
+        </div>
+
+        <div class="flow" role="list">
+          <div class="flow__step" role="listitem"><span class="flow__num">1</span><p class="flow__name">Клиент</p><p class="flow__desc">Избира от менюто с размери и добавки</p></div>
+          <div class="flow__step" role="listitem"><span class="flow__num">2</span><p class="flow__name">Поръчка</p><p class="flow__desc">Количка и checkout с адрес; цената се проверява на сървъра</p></div>
+          <div class="flow__step" role="listitem"><span class="flow__num">3</span><p class="flow__name">Ресторант</p><p class="flow__desc">Поръчката влиза; приемате или отказвате и задавате време</p></div>
+          <div class="flow__step" role="listitem"><span class="flow__num">4</span><p class="flow__name">Кухня</p><p class="flow__desc">Отделно устройство показва поръчката и печата бон</p></div>
+          <div class="flow__step" role="listitem"><span class="flow__num">5</span><p class="flow__name">Статус</p><p class="flow__desc">Клиентът вижда докъде е стигнала поръчката му</p></div>
+          <div class="flow__step" role="listitem"><span class="flow__num">6</span><p class="flow__name">Отчет</p><p class="flow__desc">Собственикът вижда обороти по период и смяна</p></div>
+        </div>
+
+        <div class="steps" style="margin-top:44px">
+          <article class="step">
+            <span class="step__num">1</span>
+            <div>
+              <h3>Как клиентът прави поръчка</h3>
+              <p>Отваря менюто на телефона си, избира продукт, размер и добавки, добавя в количката и попълва адрес. Ако има профил, адресът е вече запазен. Цената се преизчислява на сървъра — клиентът няма как да подмени сумата.</p>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step__num">2</span>
+            <div>
+              <h3>Как заведението получава поръчката</h3>
+              <p>Поръчката се появява в екрана с живите поръчки и пристига имейл. Виждате какво е поръчано, на кой адрес и на каква стойност.</p>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step__num">3</span>
+            <div>
+              <h3>Как се приема или отказва</h3>
+              <p>С едно натискане приемате поръчката и задавате време за изпълнение, или я отказвате с причина. Клиентът получава имейл и в двата случая.</p>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step__num">4</span>
+            <div>
+              <h3>Как кухнята вижда и печата поръчката</h3>
+              <p>Отделно Android устройство в кухнята показва поръчката и печата бон на 80 mm термален принтер по Bluetooth. Персоналът не влиза в никакъв административен панел.</p>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step__num">5</span>
+            <div>
+              <h3>Как клиентът получава статус</h3>
+              <p>Поръчката минава през ясни статуси: очаква потвърждение, прието, приготвя се, готово, в доставка, доставено. Клиентът ги вижда в профила си.</p>
+            </div>
+          </article>
+          <article class="step">
+            <span class="step__num">6</span>
+            <div>
+              <h3>Как собственикът вижда отчети</h3>
+              <p>Справки по период и по работна смяна: колко поръчки, на каква стойност, кои продукти.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORE / ADD-ONS -->
+    <section class="section section--alt" id="scope">
+      <div class="container">
+        <div class="section__head">
+          <p class="section__kicker">Обхват</p>
+          <h2 class="section__title">Какво е включено и какво е допълнително</h2>
+          <p class="section__lead">Разделението е ясно предварително. Няма „ще видим в движение“.</p>
+        </div>
+
+        <div class="split">
+          <div class="panel panel--core">
+            <span class="panel__tag">Включено в основния пакет</span>
+            <h3>Core</h3>
+            <p class="panel__lead">Това работи при всяко заведение и не се доплаща.</p>
+            <ul>
+              <li>Брандиран responsive сайт с меню</li>
+              <li>Категории, продукти, размери и добавки</li>
+              <li>Обозначени алергени</li>
+              <li>Количка и checkout</li>
+              <li>Доставка с такса и минимална сума</li>
+              <li>Сървърна проверка на цените</li>
+              <li>Плащане в брой при доставка</li>
+              <li>Клиентски профили, адреси и история</li>
+              <li>Роли за персонала и защитен админ панел</li>
+              <li>Управление на поръчки със 7 статуса</li>
+              <li>Приемане и отказ с време за изпълнение</li>
+              <li>Админ управление на менюто и цените</li>
+              <li>Работно време и настройки на ресторанта</li>
+              <li>Отчети по период и по смяна</li>
+              <li>Имейл известия към заведението и клиента</li>
+              <li>Кухненско приложение и печат на бон</li>
+              <li>Легални страници (структура)</li>
+            </ul>
+          </div>
+
+          <div class="panel panel--addon">
+            <span class="panel__tag">Допълнително, по избор</span>
+            <h3>Add-ons</h3>
+            <p class="panel__lead">Добавя се само ако решава ваш конкретен проблем.</p>
+            <ul>
+              <li>Картови плащания онлайн</li>
+              <li>Втори език</li>
+              <li>Няколко зони за доставка с различни правила</li>
+              <li>Промо кодове</li>
+              <li>Loyalty програма</li>
+              <li>SMS известия</li>
+              <li>Допълнителни устройства в кухнята</li>
+              <li>Допълнителни принтери</li>
+              <li>Разширени справки и експорт</li>
+              <li>Допълнителни локации (до 3)</li>
+              <li>Експорт на клиенти към имейл платформа</li>
+            </ul>
+            <div class="notice" style="margin-top:20px">
+              <b>Извън add-ons</b>
+              <p>Интеграция с POS/ERP система, приложение за краен потребител и четири или повече локации с обща синхронизация се оценяват като отделен проект, не като добавка.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЗА КОГО -->
+    <section class="section" id="fit">
+      <div class="container">
+        <div class="section__head">
+          <p class="section__kicker">Подходящо ли е за вас</p>
+          <h2 class="section__title">За кого е и за кого не е</h2>
+          <p class="section__lead">По-полезно е да разберем това за пет минути, отколкото за пет седмици.</p>
+        </div>
+
+        <div class="fit">
+          <div class="fit__col fit__col--yes">
+            <h3>Подходяща е, ако</h3>
+            <ul>
+              <li>Приемате поръчки за доставка или вземане от място</li>
+              <li>Имате редовни поръчки, а не единични</li>
+              <li>Имате една до три локации</li>
+              <li>Имате собствен персонал и кухня</li>
+              <li>Менюто ви има размери, добавки или варианти</li>
+              <li>Плащате комисиона на платформа и това ви тежи</li>
+              <li>Имате човек, който може да поеме внедряването</li>
+            </ul>
+          </div>
+          <div class="fit__col fit__col--no">
+            <h3>Не е подходяща, ако</h3>
+            <ul>
+              <li>Търсите само QR меню без поръчки</li>
+              <li>Нямате доставка и вземане от място</li>
+              <li>Обектът е сезонен, без стабилен поток поръчки</li>
+              <li>Търсите евтин информационен сайт</li>
+              <li>Сте част от верига с централизирано IT решение</li>
+              <li>Нямате капацитет да обработвате онлайн поръчки</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ВНЕДРЯВАНЕ -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <p class="section__kicker">Процес</p>
+          <h2 class="section__title">Как протича внедряването</h2>
+          <p class="section__lead">Тежката част е от моя страна. От вас трябват менюто и няколко решения.</p>
+        </div>
+
+        <div class="impl">
+          <div class="impl__card"><p class="impl__phase">Стъпка 1</p><h3>Разговор</h3><p>Как влизат поръчките днес, какъв е обемът и къде боли. 20 минути.</p></div>
+          <div class="impl__card"><p class="impl__phase">Стъпка 2</p><h3>Демонстрация</h3><p>Показвам системата на живо и правим тестова поръчка заедно.</p></div>
+          <div class="impl__card"><p class="impl__phase">Стъпка 3</p><h3>Оферта</h3><p>Точен обхват, лимити, срок и цена — писмено. Одобрявате преди старта.</p></div>
+          <div class="impl__card"><p class="impl__phase">Стъпка 4</p><h3>Материали</h3><p>Изпращате меню, снимки, зона за доставка и работно време.</p></div>
+          <div class="impl__card"><p class="impl__phase">Стъпка 5</p><h3>Настройка</h3><p>Изграждам вашата версия: branding, меню, зони, правила.</p></div>
+          <div class="impl__card"><p class="impl__phase">Стъпка 6</p><h3>Тест</h3><p>Правим тестови поръчки заедно, включително през кухнята и принтера.</p></div>
+          <div class="impl__card"><p class="impl__phase">Стъпка 7</p><h3>Обучение</h3><p>Показвам на екипа какво прави — това са няколко екрана, не курс.</p></div>
+          <div class="impl__card"><p class="impl__phase">Стъпка 8</p><h3>Пускане</h3><p>Домейн, стартиране и поддръжка в първите дни.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ДОКАЗАТЕЛСТВО -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head">
+          <p class="section__kicker">Доказателство</p>
+          <h2 class="section__title">Системата не е презентация</h2>
+        </div>
+
+        <div class="proof">
+          <p style="color:var(--ink-2);max-width:64ch">
+            Системата е изградена за действаща пицария, работеща от 2012 г.
+            Всичко описано по-горе е реализирано и проверено в код — меню с варианти
+            и добавки, количка, checkout със сървърна проверка на цените, клиентски
+            профили, роли, седем статуса на поръчката, админ панел, отчети, имейли,
+            кухненско приложение и печат на бонове.
+          </p>
+
+          <dl class="proof__grid">
+            <div class="proof__item"><dt>Продукти в менюто</dt><dd>98 в 10 категории</dd></div>
+            <div class="proof__item"><dt>Езици</dt><dd>BG / EN</dd></div>
+            <div class="proof__item"><dt>Статуси на поръчката</dt><dd>7</dd></div>
+            <div class="proof__item"><dt>Роли на достъп</dt><dd>4</dd></div>
+            <div class="proof__item"><dt>Проверка на цената</dt><dd>на сървъра</dd></div>
+            <div class="proof__item"><dt>Печат</dt><dd>80 mm термален, по Bluetooth</dd></div>
+          </dl>
+
+          <div class="notice">
+            <b>Честно за статуса</b>
+            <p>
+              Системата е разработена и технически валидирана, но към момента още
+              не е пусната в реална среда — предстоят домейн, хостинг и реални
+              снимки. В текущата версия клиентският checkout поддържа доставка с
+              плащане в брой; вземането от място е готово откъм печат в кухнята и
+              се довършва в клиентския път. Картовите плащания и връзката с
+              POS система не са внедрени. Казвам ви това предварително, за да
+              няма изненади в средата на проекта.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section section--alt" id="faq">
+      <div class="container">
+        <div class="section__head">
+          <p class="section__kicker">Въпроси</p>
+          <h2 class="section__title">Честите въпроси</h2>
+        </div>
+
+        <div class="faq">
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Трябва ли да спра Glovo или Bolt Food?</button><div class="faq__a"><p>Не. Повечето заведения държат и двете. Идеята е поръчките от клиенти, които и без това ви знаят, да не минават през процент. Платформите остават за откриване на нови клиенти.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Колко струва?</button><div class="faq__a"><p>Зависи от менюто, от това дали искате доставка, вземане от място или и двете, и от избраните допълнения. Затова първо показвам системата, а после давам точна цена писмено — с обхват, лимити и срок. Обща оферта без тези неща не върши работа на никого.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Персоналът ще се справи ли?</button><div class="faq__a"><p>Кухнята вижда поръчката на отделно устройство и я печата — екипът не влиза в административен панел. Управителят приема поръчката с едно натискане и задава време. На демонстрацията ще видите точно колко екрана пипа персоналът.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Какво трябва да купя допълнително?</button><div class="faq__a"><p>Домейн и хостинг (годишно и месечно), Android таблет за кухнята и съвместим 80 mm Bluetooth термален принтер. Съвместимостта на принтера се проверява преди офертата, не след нея.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Мога ли сам да сменям цени и продукти?</button><div class="faq__a"><p>Да. Категориите, продуктите, размерите, добавките и цените се управляват от административния панел. Промяната се вижда на сайта веднага, без разработчик.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Ами ако имам две локации?</button><div class="faq__a"><p>До три локации се решават като допълнение — всяка със собствено меню, работно време и поръчки. Четири и повече със споделена наличност вече е отделен проект и се оценява поотделно.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Клиентите ми могат ли да платят с карта?</button><div class="faq__a"><p>В основния пакет плащането е в брой при доставка. Картовите плащания са допълнение — изискват договор с платежен доставчик от ваша страна и се офертират отделно.</p></div></div>
+          <div class="faq__item"><button class="faq__q" aria-expanded="false">Колко време отнема внедряването?</button><div class="faq__a"><p>Зависи главно от това колко бързо получа менюто и снимките. Срокът се фиксира писмено в офертата и тече от момента, в който съм получил последния материал от вас.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="cta">
+      <div class="container">
+        <h2>Вижте я на живо за 15 минути</h2>
+        <p>Правим тестова поръчка заедно и виждате как излиза при кухнята. Без ангажимент и без презентация.</p>
+        <div class="hero__actions">
+          <a href="tel:+359877364001" class="btn btn--primary">Обади се: 0877 364 001</a>
+          <a href="mailto:pr2.blazhev@gmail.com?subject=Демонстрация%20—%20система%20за%20онлайн%20поръчки" class="btn btn--ghost">Пиши на имейл</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="ftr">
+    <div class="container ftr__inner">
+      <span>Преслав Блажев · <a href="mailto:pr2.blazhev@gmail.com">pr2.blazhev@gmail.com</a> · <a href="tel:+359877364001">0877 364 001</a></span>
+      <span>Системи за онлайн поръчки за заведения</span>
+    </div>
+  </footer>
+
+  <script>
+    /* FAQ акордеон — без зависимости. */
+    document.querySelectorAll('.faq__item').forEach(function (item) {
+      var q = item.querySelector('.faq__q');
+      var a = item.querySelector('.faq__a');
+      q.addEventListener('click', function () {
+        var open = item.classList.contains('is-open');
+        document.querySelectorAll('.faq__item').forEach(function (o) {
+          o.classList.remove('is-open');
+          o.querySelector('.faq__q').setAttribute('aria-expanded', 'false');
+          o.querySelector('.faq__a').style.maxHeight = null;
+        });
+        if (!open) {
+          item.classList.add('is-open');
+          q.setAttribute('aria-expanded', 'true');
+          a.style.maxHeight = a.scrollHeight + 'px';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

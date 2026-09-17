@@ -1,0 +1,2 @@
+﻿"Account ID","Campaign","Campaign type","Campaign daily budget","Campaign status","Language targeting","Networks","Bid strategy type","Maximum CPC bid limit","Final URL suffix"
+"872-650-8560","BDS | Search | Restaurants","Search","10.00","Paused","bg;en","Google Search","Maximize clicks","0.90","utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_content={creative}&utm_term={keyword}"
